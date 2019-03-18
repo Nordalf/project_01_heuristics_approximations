@@ -19,6 +19,7 @@ class Solution:
         " are equal. Lastly then we ensure the capacity for each vehicle does not exceed their maximum capacity."
         "The capacity is handled in the solverCH.py, when the solution is being created"
         ## To complete
+
         isValid = True
         # Lets start of by checking the arcs of the solution.
         leavingVehicles = 0
@@ -80,12 +81,11 @@ class Solution:
 
     def plot_table(self, outputfile_name=None, inserted_row_labels=None, table_vals=None):
         "Filling a table with results"
-        #fig = plt.figure()
+        fig = plt.figure()
         col_labels = ['Instance', 'KLB', 'Cost', 'Time (sec)', 'Cost', 'Time (sec)']
-        row_labels = inserted_row_labels
+        row_labels = [inserted_row_labels]
         # Draw table
-        the_table = plt.table(cellText=table_vals,
-                            colWidths=[0.1] * 3,
+        the_table = plt.table(cellText=[table_vals],                            
                             rowLabels=row_labels,
                             colLabels=col_labels,
                             loc='center')

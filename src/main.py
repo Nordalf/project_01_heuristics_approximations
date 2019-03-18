@@ -15,27 +15,30 @@ import utilities
 # @my_logger
 # @my_timer
 
-ch_instance_times = []
-ch_instance_costs = []
+ch_instance_times_costs = []
 def solve(instance, config):
+    global ch_instance_times_costs
     t0 = time.process_time() # Changed from clock to process_time due to deprecation
     ch = solverCH.ConstructionHeuristics(instance)
     sol = ch.construct(config.time_limit-t0) # returns an object of type Solution
     sol.cost(ch.total_distance) # Adds the heuristic cost to the solution
+    ch.total_distance = round(ch.total_distance,2)
     print("CH COST: ", ch.total_distance)
-    ch_instance_times = [t0]
-    ch_instance_costs = [ch.total_distance]
+    ch_instance_times_costs += [t0, ch.total_distance]
     assert sol.valid_solution()
+
+    # Deleting/resetting the routes to check the next solution and store it in the global array.
+    del sol.routes[:]
 
     t0 = time.process_time() # Changed from clock to process_time due to deprecation
     nn = solverNN.NearestNeighbour(instance)
     sol = nn.construct(config.time_limit-t0) # returns an object of type Solution
     sol.cost(nn.total_distance) # Adds the heuristic cost to the solution
+    nn.total_distance = round(nn.total_distance,2)
     print("NN COST: ", round(nn.total_distance,2))
-    ch_instance_times = [t0]
-    ch_instance_costs = [nn.total_distance]
+    ch_instance_times_costs += [t0, nn.total_distance]
     assert sol.valid_solution()
-
+    print(ch_instance_times_costs)
     #t0 = time.process_time() # Changed from clock to process_time due to deprecation
     #ls = solverLS.LocalSearch(instance)
     #sol = ls.local_search(sol, config.time_limit-t0) # returns an object of type Solution
@@ -80,7 +83,7 @@ def main(argv):
     if config.output_file is not None:
         sol.plot_routes(config.output_file+'_sol'+'.png')
         sol.write_to_file(config.output_file+'.sol')
-        sol.plot_table(config.output_file+'_tbl'+'.png', )
+        sol.plot_table(config.output_file+'_tbl', instance.instance_name, ch_instance_times_costs)
     print("{} routes with total cost {:.1f}"
           .format(len(sol.routes), sol.costVal))
 
