@@ -15,7 +15,6 @@ class Data:
     nodes = tuple()
     depots = []
     decimals = 0
-
     def __init__(self, filename):
 
         tree = ET.parse(filename)
@@ -58,7 +57,7 @@ class Data:
         sys.stdout.write("Instance: {}\n".format(self.instance_name))
         sys.stdout.write("Number of nodes (incl. depots): {}\n".format( len(self.nodes) ) )
         sys.stdout.write("Capacity: {}\n".format(self.capacity))
-        sys.stdout.write("Nodes: {}\n".format(self.nodes))
+        #sys.stdout.write("Nodes: {}\n".format(self.nodes))
 
     def pre_distance(self,i,j):
         if j<i:
