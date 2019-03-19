@@ -221,3 +221,5 @@ TSWLatexianTemp*
 
 # pycache
 __pycache__
+
+.idea
