@@ -38,7 +38,7 @@ def solve(instance, config):
     print("NN COST: ", round(nn.total_distance,2))
     ch_instance_times_costs += [t0, nn.total_distance]
     assert sol.valid_solution()
-    print(ch_instance_times_costs)
+    
     #t0 = time.process_time() # Changed from clock to process_time due to deprecation
     #ls = solverLS.LocalSearch(instance)
     #sol = ls.local_search(sol, config.time_limit-t0) # returns an object of type Solution
