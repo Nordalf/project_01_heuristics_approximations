@@ -27,33 +27,40 @@ class NearestNeighbour:
         t0 = time.clock()
         route = [0]
         q=0
-        # Just to have a ******** number
-        shortestDistance = 10000000
+        # Until further notice
+        shortestDistance = 100000
+        route_total_distance = 0
         current = 0
         visited = []
+        
         for i in range(len(self.instance.nodes)-1):
             for j in range(1,len(self.instance.nodes)):
                 temp = self.euclideanDistance(self.instance.nodes[current]["pt"], self.instance.nodes[j]["pt"])
                 if j not in visited:                    
-                    if temp <= shortestDistance:
+                    if temp < shortestDistance:
                         shortestDistance = temp
                         current = j
                         visited += [j]
                         if q+self.instance.nodes[current]["rq"] <= self.instance.capacity:
-                            q+=self.instance.nodes[current]["rq"]                            
+                            q+=self.instance.nodes[current]["rq"]
                             if len(route) > 0:
                                 self.total_distance += shortestDistance
-                            route += [current]                            
+                                route_total_distance += shortestDistance
+                            route += [current]
                         else:
-                            self.total_distance += shortestDistance
+                            sol.route_distances += [route_total_distance]
+                            route_total_distance = 0
+                            sol.route_rq_slack += [q]
                             sol.routes += [route+[0]]
-                            route = [0,current]                
+                            route = [0,current]
                             q=self.instance.nodes[current]["rq"]
             shortestDistance = 10000000
             if time.clock() - t0 > time_left:
                 sys.stdout.write("Time expired")
                 return sol
-
+        sol.route_distances += [route_total_distance]
+        sol.route_rq_slack += [q]
         sol.routes += [route+[0]]
-        solution.routes = sol.routes
+        solution.routes = route
+        solution.route_distances = sol.route_distances
         return sol

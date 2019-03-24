@@ -39,11 +39,12 @@ def solve(instance, config):
     ch_instance_times_costs += [t0, nn.total_distance]
     assert sol.valid_solution()
     
-    #t0 = time.process_time() # Changed from clock to process_time due to deprecation
-    #ls = solverLS.LocalSearch(instance)
-    #sol = ls.local_search(sol, config.time_limit-t0) # returns an object of type Solution
-    #print("LS COST: ", ls.total_distance)
-    #assert sol.valid_solution()
+    t0 = time.process_time() # Changed from clock to process_time due to deprecation
+    ls = solverLS.LocalSearch(instance)
+    sol = ls.local_search3(sol, nn.total_distance, config.time_limit-t0) # returns an object of type Solution
+    print("LS COST: ", ls.total_distance)
+    ch_instance_times_costs += [t0, ls.total_distance]
+    assert sol.valid_solution()
     return sol
 
 

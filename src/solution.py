@@ -7,6 +7,8 @@ import data
 
 class Solution:
     routes = []
+    route_distances = []
+    route_rq_slack = []
     costVal = 0 # Default value
     def __init__(self, instance):
         self.instance = instance
