@@ -11,7 +11,6 @@ class KdTreeNode(namedtuple('Node', 'pt axis left_child right_child')):
 
 
 class KdTree:
-
     root = None
 
     def __init__(self, nodes):
@@ -19,7 +18,6 @@ class KdTree:
 
     def __repr__(self):
         return repr(self.root)
-
 
     def _construct(self, nodes, depth=0):
         if len(nodes) == 0:
