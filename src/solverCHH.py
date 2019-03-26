@@ -25,7 +25,8 @@ def algorithm(data, solution):
             cost += closest[1]
             capacity = capacity + data.nodes[closest[0]]['rq']
             exclude_list.append(closest[0])
-        route = route + [0]
+        if route[-1] != 0:
+            route = route + [0]
         solution.routes += [route]
         solution.costVal += cost
     return solution
