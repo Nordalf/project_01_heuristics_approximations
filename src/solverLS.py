@@ -95,7 +95,6 @@ class LocalSearch:
                                             start_sol.routes[i+1][k+1] = start_sol.routes[i][k+1]
                                             start_sol.routes[i][k+1] = tempPointer
                                             current_total_distance = current_total_distance - sidea_r1 + sidec_r1 - sidea_r2 + sidec_r2
-                                            print(current_total_distance)
                         except IndexError:
                             continue
                     

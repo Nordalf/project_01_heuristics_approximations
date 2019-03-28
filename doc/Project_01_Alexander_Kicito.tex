@@ -1,0 +1,129 @@
+\documentclass[12pt]{article}
+\usepackage[english]{babel}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{vmargin}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\setmarginsrb{3 cm}{2.5 cm}{3 cm}{2.5 cm}{1 cm}{1.5 cm}{1 cm}{1.5 cm}
+
+\title{Heuristics \& Approximations Algorithms}								% Title
+\author{Alexander \& Kicito}								% Author
+\date{10 April 2019}											% Date
+
+\makeatletter
+\let\thetitle\@title
+\let\theauthor\@author
+\let\thedate\@date
+\makeatother
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\theauthor}
+\lhead{\thetitle}
+\cfoot{\thepage}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{titlepage}
+	\centering
+    \vspace*{0.5 cm}
+    \includegraphics[scale = 0.75]{SDU_logo.png}\\[1.0 cm]	% University Logo
+    \textsc{\LARGE University of Southern Denmark}\\[2.0 cm]	% University Name
+	\textsc{\Large DM852}\\[0.5 cm]				% Course Code
+	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
+	{ \huge \bfseries \thetitle}\\
+	\rule{\linewidth}{0.2 mm} \\[1.5 cm]
+	
+	\begin{minipage}{0.4\textwidth}
+		\begin{flushleft} \large
+			\emph{Submitted To:}\\
+			Marco Chiarandini\\
+            Lene Monrad Favrholdt \\
+			IMADA \\
+			Mathematics \& Computer Science Department \\
+			\end{flushleft}
+			\end{minipage}~
+			\begin{minipage}{0.4\textwidth}
+            
+			\begin{flushright} \large
+			\emph{Submitted By :} \\
+			Alexander Lerche Falk\\
+            Kicito Narongrit Unwe\\
+            Spring - Master of Computer Science\\
+		\end{flushright}
+        
+	\end{minipage}\\[2 cm]
+	
+	
+    
+    
+    
+    
+	
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+This project shows heuristics algorithms, which can resolve the Capacitated Vehicle Routing Problem (CVRP). If the heuristic can resolve the problem, we are going to apply Local Search algorithms to improve the results from the heuristics. 
+The CVRP gives insight into how to deliver orders to customers using the shortest route for each vehicle, while preserving the capacity limit of each vehicle.\\newline
+We have created two heuristic algorithms: one using a nearest-neighbour terminology and the other one taking inspiration of clustering close customers. We also show two self-implemented Local Search algorithms. 
+Lastly, we are going to compare our own ideas against more common used algorithms, which are tested and proved to work. 
+
+\hspace{1 cm}--- Alexander \& Kicito
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{biblist}
+
+\section{Custom Heuristics Algorithms}
+
+
+The first algorithm, which we have created, takes the approach of the Nearest Neighbour idea. Given an instance of CVRP, the starting point \- the depot where the vehicles are being loaded with customer requests \- is the point, where all calculations start. 
+We start by checking the nearest point from the depot and add it to the first route. We then add the shortest path from the newly added point to the route and continue until we are out of capacity. Each point (customer) has a capacity, which adds up until the max is reached. We continue during the same from adding the first shortest route from the depot until we have reached our capacity limit. At one point, we have x amounts of routes, covering the problem instance. 
+\newline
+
+\begin{algorithm}
+	\caption{Custom CVRP Heuristic - Nearest Neighbour Approach}\label{euclid}
+	\begin{algorithmic}[1]
+	\Procedure{MyProcedure}{}
+	\State $\textit{stringlen} \gets \text{length of }\textit{string}$
+	\State $i \gets \textit{patlen}$
+	\emph{top}:
+	\If {$i > \textit{stringlen}$} \Return false
+	\EndIf
+	\State $j \gets \textit{patlen}$
+	\emph{loop}:
+	\If {$\textit{string}(i) = \textit{path}(j)$}
+	\State $j \gets j-1$.
+	\State $i \gets i-1$.
+	\State \textbf{goto} \emph{loop}.
+	\State \textbf{close};
+	\EndIf
+	\State $i \gets i+\max(\textit{delta}_1(\textit{string}(i)),\textit{delta}_2(j))$.
+	\State \textbf{goto} \emph{top}.
+	\EndProcedure
+	\end{algorithmic}
+	\end{algorithm}
+
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{biblist}
+
+\end{document}

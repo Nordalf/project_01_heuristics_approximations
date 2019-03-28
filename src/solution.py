@@ -81,19 +81,20 @@ class Solution:
         return [value for value in array1 if value in array2]
 
 
-    def plot_table(self, outputfile_name=None, inserted_row_labels=None, table_vals=None):
+    def plot_table(self, outputfile_names=None, inserted_row_labels=None, table_vals=None):
         "Filling a table with results"
         fig = plt.figure()
-        col_labels = ['Instance', 'KLB', 'Cost', 'Time (sec)', 'Cost', 'Time (sec)']
-        row_labels = [inserted_row_labels]
+        col_labels = ('KLB', 'CH Cost', 'CH Time (sec)', 'Custom CH Cost', 'Custom CH Time (sec)', 'Custom LS Cost', 'Custom LS Time (sec)')
+        
         # Draw table
-        the_table = plt.table(cellText=[table_vals],                            
-                            rowLabels=row_labels,
+        print(len(inserted_row_labels))
+        the_table = plt.table(cellText=table_vals,
+                            rowLabels=inserted_row_labels,
                             colLabels=col_labels,
                             loc='center')
         the_table.auto_set_font_size(False)
         the_table.set_fontsize(24)
-        the_table.scale(4, 4)
+        the_table.scale(6, 6)
 
         # Removing ticks and spines enables you to get the figure only with table
         plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
@@ -101,4 +102,4 @@ class Solution:
         for pos in ['right','top','bottom','left']:
             plt.gca().spines[pos].set_visible(False)
 
-        plt.savefig(outputfile_name+'.png', bbox_inches='tight', pad_inches=0.05)
+        plt.savefig(outputfile_names+'.png', bbox_inches='tight', pad_inches=0.05)
