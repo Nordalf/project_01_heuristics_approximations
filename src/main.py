@@ -52,6 +52,7 @@ def solve(instance, alg, config):
     # t0 = time.clock()
     # ls = solverLS.LocalSearch(instance)
     # sol = ls.local_search(sol, config.time_limit-t0) # returns an object of type Solution
+    assert sol.valid_solution()
     return sol
 
 

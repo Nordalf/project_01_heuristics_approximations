@@ -13,38 +13,96 @@ class LocalSearch:
     def euclideanDistance(self, coordinate1, coordinate2):
         return pow(pow(coordinate1.x - coordinate2.x, 2) + pow(coordinate1.y - coordinate2.y, 2), .5)
 
-    def local_search(self, start_sol, time_left):
-        # To implement
+    # First attempt - Compare two routes
+    # Husk at beregne til det næste punkt, som der bliver byttet ud med
+    def local_search2(self, start_sol, current_total_distance, time_left):
+        "start_sol = 2D-array solution/routes"
         t0 = time.clock()
-        route = [0]
-        q=0
-        shortestDistance = 0
-        markedPoints = {}
-        idx = 0
-        for i in range(len(self.instance.nodes)-1): # we bypass the depot 0
-            print(route)
-            markedPoints[i] = True
-            for j in range(1, len(self.instance.nodes)):
-                if q+self.instance.nodes[i]["rq"] <= self.instance.capacity:
-                    q+=self.instance.nodes[i]["rq"]
-                    # We do not need to find the distance for the same point
-                    if self.instance.nodes[i]["pt"] != self.instance.nodes[j]["pt"]:
-                        if j == 1:
-                            shortestDistance = self.euclideanDistance(self.instance.nodes[j]["pt"], self.instance.nodes[i]["pt"])
-                        tempDist = self.euclideanDistance(self.instance.nodes[j]["pt"], self.instance.nodes[i]["pt"])
-                        if tempDist < shortestDistance:
-                            shortestDistance = tempDist
+        #print("BEFORE: ", start_sol.routes)
+        counter = 0
+        exit_criteria = True
+        while exit_criteria:
+            for i in range(len(start_sol.routes)-1):
+                for j in range(len(start_sol.routes[i])):
+                    try:
+                        # Triangle Inequality                    
+                        sidea_dist_r1 = self.euclideanDistance(self.instance.nodes[start_sol.routes[i][j]]["pt"], self.instance.nodes[start_sol.routes[i][j+1]]["pt"])
+                        sideb_dist_r1 = self.euclideanDistance(self.instance.nodes[start_sol.routes[i][j+1]]["pt"], self.instance.nodes[start_sol.routes[i+1][j+1]]["pt"])
+                        sidec_dist_r1 = self.euclideanDistance(self.instance.nodes[start_sol.routes[i][j]]["pt"], self.instance.nodes[start_sol.routes[i+1][j+1]]["pt"])
+                        sidea_dist_r2 = self.euclideanDistance(self.instance.nodes[start_sol.routes[i+1][j]]["pt"], self.instance.nodes[start_sol.routes[i+1][j+1]]["pt"])
+                        sidec_dist_r2 = self.euclideanDistance(self.instance.nodes[start_sol.routes[i+1][j]]["pt"], self.instance.nodes[start_sol.routes[i][j+1]]["pt"])
+                        if sidea_dist_r1 + sideb_dist_r1 > sidec_dist_r1: #Triangle Inequality by contradiction withhold
+                            if sidec_dist_r1 < sidea_dist_r1: # We can make a swap                            
+                                if (start_sol.route_rq_slack[i] - self.instance.nodes[start_sol.routes[i][j+1]]["rq"] + self.instance.nodes[start_sol.routes[i+1][j+1]]["rq"]) <= self.instance.capacity:
+                                    tempPointer = start_sol.routes[i+1][j+1]
+                                    start_sol.routes[i+1][j+1] = start_sol.routes[i][j+1]
+                                    start_sol.routes[i][j+1] = tempPointer
+                                    current_total_distance = current_total_distance - sidea_dist_r1 + sidec_dist_r1 - sidea_dist_r2 + sidec_dist_r2
+                                else:
+                                    counter += 1
+                                    if counter == 5:
+                                        exit_criteria = False
+                                    pass
+                                    #print("Not enough capacity")
+                    except IndexError:
+                        pass
+                            #print('Out of Range')
+                    
+                    if time.clock() - t0 > time_left:
+                        sys.stdout.write("Time expired")
+                        return start_sol
+
+        #print("AFTER: ", start_sol.routes)
+        self.total_distance = current_total_distance
+        return start_sol
+
+
+    #Første loop:
+    #   Index for at holde styr på den enkelte rute, som man er igang med
+
+    #Andet loop:
+    #   Index til hvert element i første rute
+
+    #Tredje loop:
+	#   Index til hvert element i anden rute
+    # Husk at beregne til det næste punkt, som der bliver byttet ud med
+    def local_search3(self, start_sol, current_total_distance, time_left):
+        "start_sol = 2D-array solution/routes"
+        t0 = time.clock()
+        #print("BEFORE: ", start_sol.routes)
+        exit_criteria = True
+        #while exit_criteria:
+        for i in range(len(start_sol.routes)-1):
+            if i+1 < len(start_sol.routes):
+                for j in range(len(start_sol.routes[i])-1):
+                    for k in range(len(start_sol.routes[i+1])-1):
+                        try:
+                            sidea_r1 = self.euclideanDistance(self.instance.nodes[start_sol.routes[i][k]]["pt"], self.instance.nodes[start_sol.routes[i][k+1]]["pt"])
+                            #sideb_r1 = self.euclideanDistance(self.instance.nodes[start_sol.routes[i][k+1]]["pt"], self.instance.nodes[start_sol.routes[i+1][k+1]]["pt"])
+                            sidec_r1 = self.euclideanDistance(self.instance.nodes[start_sol.routes[i][k]]["pt"], self.instance.nodes[start_sol.routes[i+1][k+1]]["pt"])
                             
-                            route += [j]
-                            self.total_distance += round(abs(self.instance.nodes[i-1]["pt"] - self.instance.nodes[i]["pt"]),0)
-                else:
-                    self.total_distance += round(abs(self.instance.nodes[i-1]["pt"] - self.instance.nodes[i]["pt"]),0)
-                    start_sol.routes += [route+[0]]
-                    route = [0,j]
-                    q=self.instance.nodes[i]["rq"]
+                            # Route two to equalize the swap in route one 
+                            sidea_r2 = self.euclideanDistance(self.instance.nodes[start_sol.routes[i+1][k]]["pt"], self.instance.nodes[start_sol.routes[i+1][k+1]]["pt"])
+                            # Side B Route 2 is the same as Side B Route 1
+                            sidec_r2 = self.euclideanDistance(self.instance.nodes[start_sol.routes[i+1][k]]["pt"], self.instance.nodes[start_sol.routes[i+1][k+1]]["pt"])
+
+                            if sidea_r1 > sidec_r1:
+                                # Keeping the MAX capacity
+                                if (start_sol.route_rq_slack[i] - self.instance.nodes[start_sol.routes[i][k+1]]["rq"] + self.instance.nodes[start_sol.routes[i+1][k+1]]["rq"]) <= self.instance.capacity:
+                                    if (start_sol.route_rq_slack[i+1] - self.instance.nodes[start_sol.routes[i+1][k+1]]["rq"] + self.instance.nodes[start_sol.routes[i][k+1]]["rq"]) <= self.instance.capacity:
+                                        if start_sol.routes[i+1][k+1] != 0 and start_sol.routes[i][k+1] != 0:
+                                            tempPointer = start_sol.routes[i+1][k+1]
+                                            start_sol.routes[i+1][k+1] = start_sol.routes[i][k+1]
+                                            start_sol.routes[i][k+1] = tempPointer
+                                            current_total_distance = current_total_distance - sidea_r1 + sidec_r1 - sidea_r2 + sidec_r2
+                                            print(current_total_distance)
+                        except IndexError:
+                            continue
+                    
             if time.clock() - t0 > time_left:
                 sys.stdout.write("Time expired")
                 return start_sol
-        start_sol.routes += [route+[0]]
-        solution.routes = start_sol.routes
+
+        #print("AFTER: ", start_sol.routes)
+        self.total_distance = current_total_distance
         return start_sol
