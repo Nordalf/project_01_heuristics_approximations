@@ -51,19 +51,19 @@ class Solution:
         return (isValid)
 
     def cost(self):
-        
+
         return sum([self.instance.route_length(r) for r in self.routes])
 
     def write_to_file(self, filename):
         with open(filename, "w") as filehandle:
             for route in self.routes:
                 filehandle.write(
-                    ",".join(map(lambda x: self.instance.nodes[x]["id"], route)) + "\n")
+                    ",".join(map(lambda x: str(self.instance.nodes[x]["id"]), route)) + "\n")
 
-    def plot_lines(self, points, style='bo-'):
+    def plot_lines(self, points, color=None, style='bo-'):
         "Plot lines to connect a series of points."
         plt.plot([self.instance.nodes[p]["pt"].x for p in points], [self.instance.nodes[p]["pt"].y for p in points],
-                 style)
+                 style, color=color)
         plt.axis('scaled')
         plt.axis('off')
 
@@ -72,8 +72,8 @@ class Solution:
 
     def plot_routes(self, split=False, output_filename=None):
         "routes is a list of routes (alternatively it can be a grand route).  The depot is red square."
-        color = ["b", "g", "r", "c", "m", "k"]
-        c = 0
+        colormap = plt.cm.get_cmap('hsv', len(self.routes))
+
         if split:
             ax1 = plt.subplot(1, len(self.routes), 1)
             for (index, route) in enumerate(self.routes):
@@ -81,17 +81,20 @@ class Solution:
                 plt.subplot(1, len(self.routes), index +
                             1, sharex=ax1, sharey=ax1)
                 self.plot_instance_points()
-                self.plot_lines(list(route) + [start], style=color[c] + "o-")
+                self.plot_lines(
+                    list(route) + [start], color=colormap(index), style="o-")
                 # Mark the start city with a red square
-                self.plot_lines([start], 'rs')
-                c = (c + 1) % len(color)
+                self.plot_lines([start], style='rs')
         else:
+            c = 0
             for route in self.routes:
                 start = route[0]
-                self.plot_lines(list(route) + [start], style=color[c] + "o-")
+                self.plot_instance_points()
+                self.plot_lines(
+                    list(route) + [start], color=colormap(c), style="o-")
                 # Mark the start city with a red square
-                self.plot_lines([start], 'rs')
-                c = (c + 1) % len(color)
+                self.plot_lines([start], style='rs')
+                c += 1
         if output_filename is None:
             plt.show()
         else:

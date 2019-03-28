@@ -48,7 +48,7 @@ class Data:
                      root.find('requests').findall('request')}
 
         _nodes = [{
-            "id": node.get("id"),
+            "id": int(node.get("id")),
             "pt": Point(float(node.find("cx").text), float(node.find("cy").text)),
             "tp": int(node.get("type")),
             "rq": 0 if node.get("id") not in _requests else _requests[node.get("id")]
@@ -63,7 +63,6 @@ class Data:
                           for i in range(len(_nodes)) if i not in self.depots]
 
         self.nodes = tuple([_nodes[x] for x in self.depots] + self.customers)
-
         # self.tree = kd_tree.KdTree(self.nodes)
 
         self.capacity = float(root.find('fleet').find(
@@ -105,7 +104,7 @@ class Data:
         "The distance between two points."
         return round(abs(A - B), self.decimals)
 
-    def furthest_point(self, i, excluded=[]):
+    def furthest_point(self, i, excluded=[], include=[]):
         max_index = -1
         max_dist = -sys.maxsize-1
         i = int(i)

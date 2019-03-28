@@ -15,8 +15,9 @@ from error import TimeOutExeption
 
 
 from solver import ConstructionHeuristics
-import three_opt
+from three_opt import ThreeOpt
 from two_opt import TwoOPT
+from cluster_localsearch import ClusterOPT
 from local_search import LocalSearch
 
 import matplotlib.pyplot as plt
@@ -39,15 +40,24 @@ def solve(instance, alg, config):
         print("timeout")
         sol = e.solution
     print(sol.routes)
-    ls_alg = TwoOPT(sol).run
+
+    
+    ls_alg = ThreeOpt(sol).run
     ls = LocalSearch(solution=sol, alg=ls_alg)
     try:
         sol = ls.construct(config.time_limit-t0)
     except TimeOutExeption as e:
         print("timeout")
         sol = e.solution
-    print(sol.routes)
-    
+
+    # ls_alg = ClusterOPT(sol).run
+    # ls = LocalSearch(solution=sol, alg=ls_alg)
+    # try:
+    #     sol = ls.construct(config.time_limit-t0)
+    # except TimeOutExeption as e:
+    #     print("timeout")
+    #     sol = e.solution
+    # print(sol.routes)
     
     # t0 = time.clock()
     # ls = solverLS.LocalSearch(instance)

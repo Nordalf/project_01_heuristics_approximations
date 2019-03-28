@@ -1,9 +1,11 @@
 import sys
+from convex_hull import ConvexHull
 
 
-class TwoOPT:
+class ClusterOPT:
     """
-    implementation of two opt for travelling salesman problem
+    implementation of cluster opt for cvrp problem,
+    it's compare each convex hull point of each route and move it if it make better route
     """
     solution = None
 
@@ -36,7 +38,13 @@ class TwoOPT:
                 return tour
 
     def run(self):
-        for route_index in range(len(self.solution.routes)):
-            self.solution.routes[route_index] = self.two_opt_first_gain(
-                self.solution.routes[route_index])
+        ch = ConvexHull(self.solution.instance)
+        for route in self.solution.routes:
+            routes_points = [(customer_index, self.solution.instance.nodes[customer_index]['pt'])
+                             for customer_index in route]
+            convex = ch.convex_hull(routes_points[:-1])
+            print(convex[:-1])
+        # for route_index in range(len(self.solution.routes)):
+        #     self.solution.routes[route_index] = self.two_opt_first_gain(
+        #         self.solution.routes[route_index])
         return self.solution
