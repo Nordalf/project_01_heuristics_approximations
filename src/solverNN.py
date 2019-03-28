@@ -28,11 +28,11 @@ def algorithm(data, solution):
                     visited += [j]
                     if q+data.nodes[current]["rq"] <= data.capacity:
                         q += data.nodes[current]["rq"]
-                        if len(route) > 0:
-                            solution.costVal += shortestDistance
+                        # if len(route) > 0:
+                        #     solution.costVal += shortestDistance
                         route += [current]
                     else:
-                        solution.costVal += shortestDistance
+                        # solution.costVal += shortestDistance
                         solution.routes += [route+[0]]
                         route = [0, current]
                         q = data.nodes[current]["rq"]

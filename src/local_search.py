@@ -21,5 +21,5 @@ class LocalSearch:
         return self.localsearch()
 
     def localsearch(self):
-        self.solution = self.alg(self.solution)
+        self.solution = self.alg()
         return self.solution

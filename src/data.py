@@ -133,13 +133,16 @@ class Data:
                     min_dist = distance
         return (min_index, min_dist)
 
+    def route_length(self, route):
+        return sum(self.pre_distance(route[i], route[i-1]) for i in range(len(route)))
+
     def plot_points(self, show=True, outputfile_name=None):
         "Plot instance points."
         style = 'bo'
 
         for (label, p) in enumerate(self.nodes):
             plt.text(p["pt"].x, p["pt"].y, '  ' + str(label))
-        
+
         plt.plot([node["pt"].x for node in self.nodes], [
                  node["pt"].y for node in self.nodes], style)
         plt.plot([self.nodes[0]["pt"].x], [self.nodes[0]["pt"].y], "rs")

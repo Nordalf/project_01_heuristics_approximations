@@ -8,7 +8,6 @@ import data
 class Solution:
     total_distance = 0
     routes = []
-    costVal = 0  # Default value
 
     def __init__(self, instance):
         self.instance = instance
@@ -51,9 +50,9 @@ class Solution:
         print("The validity of the solution  is: ", isValid)
         return (isValid)
 
-    # def cost(self, costVal):
-    #     self.costVal = costVal
-    #     return (self.costVal)
+    def cost(self):
+        
+        return sum([self.instance.route_length(r) for r in self.routes])
 
     def write_to_file(self, filename):
         with open(filename, "w") as filehandle:

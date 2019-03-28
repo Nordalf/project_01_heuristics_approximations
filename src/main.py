@@ -16,6 +16,7 @@ from error import TimeOutExeption
 
 from solver import ConstructionHeuristics
 import three_opt
+from two_opt import TwoOPT
 from local_search import LocalSearch
 
 import matplotlib.pyplot as plt
@@ -38,7 +39,7 @@ def solve(instance, alg, config):
         print("timeout")
         sol = e.solution
     print(sol.routes)
-    ls_alg = three_opt.algorithm
+    ls_alg = TwoOPT(sol).run
     ls = LocalSearch(solution=sol, alg=ls_alg)
     try:
         sol = ls.construct(config.time_limit-t0)
@@ -94,7 +95,7 @@ def main(argv):
         # sol.plot_table(config.output_file+'_tbl',
         #                instance.instance_name, ch_instance_times_costs)
     print("{} routes with total cost {:.1f}"
-          .format(len(sol.routes), sol.costVal))
+          .format(len(sol.routes), sol.cost()))
 
 
 if __name__ == "__main__":

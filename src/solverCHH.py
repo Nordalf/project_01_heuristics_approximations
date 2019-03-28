@@ -28,6 +28,5 @@ def algorithm(data, solution):
         if route[-1] != 0:
             route = route + [0]
         solution.routes += [route]
-        solution.costVal += cost
     return solution
 

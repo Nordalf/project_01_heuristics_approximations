@@ -167,6 +167,6 @@ def algorithm(solution):
     for route_index in range(len(solution.routes)):
         solution.routes[route_index], gain = three_opt_best_gain(
             solution.routes[route_index][:-1], distance)
-        solution.costVal -= gain
+        # solution.costVal -= gain
 
     return solution
