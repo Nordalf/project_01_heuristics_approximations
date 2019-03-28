@@ -221,4 +221,10 @@ TSWLatexianTemp*
 *-tags.tex
 
 # pycache
-__pycache__
+**/__pycache__
+
+.idea
+
+*.png
+*.sol
+.vscode
