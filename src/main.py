@@ -55,13 +55,13 @@ def solve(instance, alg, config):
         print("timeout")
         sol = e.solution
 
-    # ls_alg = ClusterOPT(sol).run
-    # ls = LocalSearch(solution=sol, alg=ls_alg)
-    # try:
-    #     sol = ls.construct(config.time_limit-t0)
-    # except TimeOutExeption as e:
-    #     print("timeout")
-    #     sol = e.solution
+    ls_alg = ClusterOPT(sol).run
+    ls = LocalSearch(solution=sol, alg=ls_alg)
+    try:
+        sol = ls.construct(config.time_limit-t0)
+    except TimeOutExeption as e:
+        print("timeout")
+        sol = e.solution
     # print(sol.routes)
     
     # t0 = time.clock()
@@ -113,7 +113,6 @@ def main(argv):
     alg = solverNN.algorithm
     #alg = solverCHH.algorithm
     sol = solve(instance, alg, config)
-
     if config.output_file is not None:
         sol.plot_routes(split=config.split_route,
                         output_filename=config.output_file+'_sol'+'.png')

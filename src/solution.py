@@ -6,7 +6,6 @@ import data
 
 
 class Solution:
-    total_distance = 0
     routes = []
 
     def __init__(self, instance):
@@ -51,9 +50,11 @@ class Solution:
         return (isValid)
 
     def cost(self):
-
         return sum([self.instance.route_length(r) for r in self.routes])
 
+    def route_index_capacity(self, index):
+        return self.instance.route_capacity(self.routes[index])
+    
     def write_to_file(self, filename):
         with open(filename, "w") as filehandle:
             for route in self.routes:

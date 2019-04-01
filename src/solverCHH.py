@@ -22,7 +22,7 @@ def algorithm(data, solution):
         while capacity < data.capacity:
             if len(exclude_list)-2 == len(data.customers):
                 break
-            closest = data.closest_point(curr_point[0], exclude_list)
+            closest = data.closest_point(curr_point[0], excluded=exclude_list)
             if closest[0] == -1:
                 break
             c = data.nodes[closest[0]]['rq']
