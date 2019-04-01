@@ -3,6 +3,7 @@
 import argparse
 
 import sys
+import os
 import data
 import time
 import solution
@@ -92,7 +93,15 @@ def main(argv):
     parser.add_argument('instance_file', action='store',
                         help='The path to the file of the instance to solve')
 
+    parser.add_argument('-all', action='store',
+                        dest='all',
+                        help='The file where to save the solution and, in case, plots')
+
     config = parser.parse_args()
+
+    if config.all:
+        for file in os.walk("../data"):
+            print(file)
 
     print('instance_file    = {!r}'.format(config.instance_file))
     print('output_file      = {!r}'.format(config.output_file))
@@ -101,8 +110,8 @@ def main(argv):
 
     instance = data.Data(config.instance_file)
 
-    # alg = solverNN.algorithm
-    alg = solverCHH.algorithm
+    alg = solverNN.algorithm
+    #alg = solverCHH.algorithm
     sol = solve(instance, alg, config)
     if config.output_file is not None:
         sol.plot_routes(split=config.split_route,
