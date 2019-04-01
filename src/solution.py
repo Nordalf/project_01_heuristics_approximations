@@ -72,7 +72,6 @@ class Solution:
         self.instance.plot_points(show=False)
 
     def plot_routes(self, split=False, output_filename=None):
-        print("ploting",self.routes)
         "routes is a list of routes (alternatively it can be a grand route).  The depot is red square."
         colormap = plt.cm.get_cmap('hsv', len(self.routes))
 

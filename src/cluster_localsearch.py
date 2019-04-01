@@ -27,19 +27,6 @@ class ClusterOPT:
         return self.solution.instance.route_length(route)
 
     @staticmethod
-    def two_opt_subsegments(N):
-        return [(i, i + length)
-                for length in reversed(range(2, N))
-                for i in reversed(range(N - length + 1))]
-
-    def convex_opt_if_gain(self, tour, closest_point):
-        pass
-        # A, B, C, D = tour[i-1], tour[i], tour[j-1], tour[j % len(tour)]
-        # if self.distance(A, B) + self.distance(C, D) > self.distance(A, C) + self.distance(B, D):
-        #     tour[i:j] = reversed(tour[i:j])
-        #     return True
-
-    @staticmethod
     def mid_point(points):
         return Point(sum(points) / len(points))
 
@@ -103,16 +90,16 @@ class ClusterOPT:
             if (old_distance_i + old_distance_j) > (new_distance_before_i + new_distance_j):
                 # it makes overall tour better
                 moved_point_j = tour_j.pop(closest_from_i_j)
-                print("move", moved_point_j, "to",
-                      tour_i, "before", tour_i[closest_from_j_i])
+                # print("move", moved_point_j, "to",
+                #       tour_i, "before", tour_i[closest_from_j_i])
                 tour_i.insert(closest_from_j_i, moved_point_j)
                 return True
         else:  # better visit B then E
             if (old_distance_i + old_distance_j) > (new_distance_after_i + new_distance_j):
                 # it makes overall tour better
                 moved_point_j = tour_j.pop(closest_from_i_j)
-                print("move", moved_point_j, "to",
-                      tour_i, "after", tour_i[closest_from_j_i])
+                # print("move", moved_point_j, "to",
+                #       tour_i, "after", tour_i[closest_from_j_i])
                 tour_i.insert(closest_from_j_i+1, moved_point_j)
                 return True
 
@@ -128,12 +115,12 @@ class ClusterOPT:
 
     def is_capacity_reach_when_move(self, route_i, customer):
         max_capacity = self.solution.instance.capacity
-        print("curr capacity", self.solution.route_index_capacity(
-            route_i))
+        # print("curr capacity", self.solution.route_index_capacity(
+            # route_i))
         new_capacity_i = self.solution.route_index_capacity(
             route_i) + self.solution.instance.node_capacity(customer)
 
-        print("new capacity", new_capacity_i)
+        # print("new capacity", new_capacity_i)
         return new_capacity_i >= max_capacity
 
     def convex_opt_closest_gain(self, routes):
@@ -142,7 +129,7 @@ class ClusterOPT:
             for (i, j) in self.cluster_permutation(len(routes)):
                 if len(routes[i]) == 1 or len(routes[j]) == 1:
                     continue
-                print("before", routes[i], routes[j])
+                # print("before", routes[i], routes[j])
                 mid_point_i = self.mid_point(
                     [point[1] for point in self.route_convexes[i]])
                 mid_point_j = self.mid_point(
@@ -167,9 +154,9 @@ class ClusterOPT:
                 if not self.is_capacity_reach_when_move(i, routes[j][closest_from_i_j]):
                     improvements = self.convex_opt_move_if_improvement(
                         routes[i], routes[j], closest_from_i_j, closest_from_j_i)
-                # elif not self.is_capacity_reach_when_move(j, routes[i][closest_from_j_i]):
-                #     improvements = self.convex_opt_move_if_improvement(
-                #         routes[j], routes[i], closest_from_j_i, closest_from_i_j)
+                elif not self.is_capacity_reach_when_move(j, routes[i][closest_from_j_i]):
+                    improvements = self.convex_opt_move_if_improvement(
+                        routes[j], routes[i], closest_from_j_i, closest_from_i_j)
                 elif not self.is_capacity_reach_when_swap(
                         i, j, routes[i][closest_from_j_i], routes[j][closest_from_i_j]):
 
@@ -189,23 +176,6 @@ class ClusterOPT:
 
             if bool(improvements) or improvements is None:
                 return routes
-        # for route_index in range(len(routes)):
-        #     # calculate mean point of the tour
-        #     mid_point = self.mid_point(
-        #         [point[1] for point in self.route_convexes[route_index]])
-
-        #     print("current capacity", self.solution.instance.route_capacity(
-        #         routes[route_index]))
-
-        #     # find closest point of other's route to the current's route convex midpoint
-        #     for route_index_in in range(len(routes)):
-        #         if route_index_in == route_index:
-        #             continue
-        #         convex_indexed = [point[0]
-        #                           for point in self.route_convexes[route_index_in]]
-        #         closest_point = self.closest_point(mid_point, convex_indexed)
-        #         print("closest=", closest_point, "capacity",
-        #               self.solution.instance.node_capacity(closest_point[0]))
             # debugging plot
             # style = 'bo-'
             # plt.plot()
@@ -217,10 +187,6 @@ class ClusterOPT:
             # plt.plot([point[1].x for point in route_convexes[route_index]] + [route_convexes[route_index][0][1].x], [
             #         point[1].y for point in route_convexes[route_index]] + [route_convexes[route_index][0][1].y], style)
             # plt.show()
-        # for route_index in range(len(self.solution.routes)):
-        #     self.solution.routes[route_index] = self.two_opt_first_gain(
-        #         self.solution.routes[route_index])
-        # return routes
 
     def run(self):
         self.solution.routes = self.convex_opt_closest_gain(

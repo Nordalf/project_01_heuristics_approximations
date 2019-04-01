@@ -61,7 +61,7 @@ def solve(instance, alg, config):
     except TimeOutExeption as e:
         print("timeout")
         sol = e.solution
-    print(sol.routes)
+    # print(sol.routes)
     
     # t0 = time.clock()
     # ls = solverLS.LocalSearch(instance)
@@ -104,7 +104,6 @@ def main(argv):
     # alg = solverNN.algorithm
     alg = solverCHH.algorithm
     sol = solve(instance, alg, config)
-    print("sol 3", sol.route_index_capacity(3))
     if config.output_file is not None:
         sol.plot_routes(split=config.split_route,
                         output_filename=config.output_file+'_sol'+'.png')
