@@ -62,7 +62,7 @@ def solve(instance, alg, config):
     except TimeOutExeption as e:
         print("timeout")
         sol = e.solution
-    # print(sol.routes)
+    print(sol.routes)
     
     # t0 = time.clock()
     # ls = solverLS.LocalSearch(instance)
@@ -110,8 +110,8 @@ def main(argv):
 
     instance = data.Data(config.instance_file)
 
-    alg = solverNN.algorithm
-    #alg = solverCHH.algorithm
+    # alg = solverNN.algorithm
+    alg = solverCHH.algorithm
     sol = solve(instance, alg, config)
     if config.output_file is not None:
         sol.plot_routes(split=config.split_route,
