@@ -62,9 +62,7 @@ class ClusterOPT:
         print("all:", (old_distance_i + old_distance_j)
               > new_distance_i + new_distance_j)
         if (old_distance_i + old_distance_j) > (new_distance_i + new_distance_j):
-            print(tour_i, tour_j)
             tour_i[closest_from_j_i], tour_j[closest_from_i_j] = tour_j[closest_from_i_j], tour_i[closest_from_j_i]
-            print(tour_i, tour_j)
             return True
 
     def convex_opt_move_if_improvement(self, tour_i, tour_j, closest_from_i_j, closest_from_j_i):
@@ -116,7 +114,7 @@ class ClusterOPT:
     def is_capacity_reach_when_move(self, route_i, customer):
         max_capacity = self.solution.instance.capacity
         # print("curr capacity", self.solution.route_index_capacity(
-            # route_i))
+        # route_i))
         new_capacity_i = self.solution.route_index_capacity(
             route_i) + self.solution.instance.node_capacity(customer)
 
@@ -172,7 +170,7 @@ class ClusterOPT:
                 if improvements:
                     print("after", routes[i], routes[j])
                     self.route_convexes = [self.ch.convex_hull(route[:-1])
-                                        for route in self.solution.routes]
+                                           for route in self.solution.routes]
 
             if bool(improvements) or improvements is None:
                 return routes

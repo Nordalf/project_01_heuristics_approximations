@@ -59,5 +59,6 @@ class ConvexHull():
             while len(l_lower) > 3 and not self.is_turn_right(l_lower[-3][1], l_lower[-2][1], l_lower[-1][1]):
                 del l_lower[-2]
         l_lower = l_lower[1:-1]
-
-        return list(dict.fromkeys(l_upper + l_lower))
+        
+        return l_upper + l_lower
+        # return list(dict.fromkeys(l_upper + l_lower))

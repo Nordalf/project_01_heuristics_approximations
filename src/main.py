@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 # @my_timer
 
 plt.figure(figsize=(20, 10))
+plt.rcParams.update({'font.size': 22})
 
 # @my_logger
 # @my_timer
