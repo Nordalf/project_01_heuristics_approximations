@@ -261,4 +261,4 @@ TSWLatexianTemp*
 # standalone packages
 *.sta
 
-!SDU_logo.png
+!*.png

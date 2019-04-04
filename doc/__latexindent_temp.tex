@@ -38,7 +38,7 @@
 \begin{titlepage}
 	\centering
     \vspace*{0.5 cm}
-    \includegraphics[scale = 0.75]{SDU_logo.png}\\[1.0 cm]	% University Logo
+    \includegraphics[scale = 0.5]{SDU_logo.png}\\[1.0 cm]	% University Logo
     \textsc{\LARGE University of Southern Denmark}\\[2.0 cm]	% University Name
 	\textsc{\Large DM852}\\[0.5 cm]				% Course Code
 	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
@@ -148,33 +148,93 @@ By choosing such approach to attack the Vehicle Routing Problem, we can ensure p
 The heuristic algorithm has the following behaviour: (1) Pick a customer point furthest from away from the depot, which is not in the solution route;
 (2) Repeatly find nearest customer point from (1), which is not in any solution route and group such point together until the capacity is reached and save the points as a cluster; (3) Repeat (1) and (2) until we cover all customer points
 
-	% \begin{algorithm}
-	% 	\caption{Custom CVRP Heuristic - Cluster Analysis Approach}\label{euclid}
-	% 	\begin{algorithmic}[1]
-	% 	\Require{$Point_{1} \dots Point_{N}$} 
-	% 	\Ensure{$Solution$ (solution to the CVRP instance)}
-	% 	\Function{algorithm}{{$Points[\;]$}}
-	% 	\State $\var{capacity} \gets \text{0}$
-	% 	\State $\var{data} \gets \text{CVRP instance}$
-	% 	\State $\var{exclude_list} \gets \textit{empty array containing visited nodes}$
-	% 	\While{\texttt{$\var{i} \gets 0$ to $\text{length of data-1}$}}
-			
-	% 	\EndWhile
+\begin{algorithm}[hbt!]
+	\caption{Custom CVRP Heuristic - Clustering Approach}
+	\begin{algorithmic}[1]
+	\Require{$Points$: List of customer Points} 
+	\Require{$depot$: Depot Point} 
+	\Require{$maxcap$: Maximum capacity for each route} 
+	\Ensure{$routes$: Solution to the CVRP instance}
+	\Function{algorithm}{{$Points$, $depot$, $maxcap$}}
+	\State $\var{excludelist} \gets \textit{empty array containing visited nodes}$
+	\State $\var{routes} \gets \textit{empty array containing solution routes}$
+	\While{\texttt{$len(excludelist) < len(customers)$}}
+		
+	\State $\var{capacity} \gets \text{0}$
+	\State $\var{route} \gets \text{[depot]}$
 	
-	% 	\State \textbf{return} $solution$
-	% 	\EndFunction
-	% 	\end{algorithmic}
-	% \end{algorithm}
+	\State $\var{startpoint} \gets furthestpoint(depot, excludelist)$
+	\State $\var{excludelist}.append(startpoint)$
+	\State $\var{route}.append(startpoint)$
+	\State $\var{capacity} \gets \var{capacity} + \var{startpoint.capacity}$
+		\While{\texttt{$len(excludelist) \le len(customers)$}}
 
-	\section{Custom Local Search Algorithms}
-	While having created the heuristics, which provides us with solutions to the initial problem instances, we can still optimize. This is where the Local Search Optimization algorithms comes into play. 
-	Given a canonical solution, we want to optimize it to reduce the total cost of the solution. We have provided three custom Local Search (LS) algorithms, trying to optimize the canonical solution. 
-	\newline
-	The first LS algorithm looks into the generated routes done by the heuristics. It takes two routes and compare them with each other, checking whether any swaps are possible in the two routes. 
-	A swap is possible if the distance is being reduced in at least one route, while still preserving the maximum capacity limit of both routes. 
-	The second LS algorithm looks like the first but with a minor change. It takes one route and compares it with every other route to find a better solution. It then continues doing this 
-	with every other route; take one route, compare it with every other route. 
-		 
+			\State $\var{closest} \gets closestpoint(startpoint, excludelist)$
+
+			\State $\var{c} \gets closest.capacity$
+
+			\If{$\var{c} + \var{capacity} > \var{max capacity}$}
+				\text{break}
+			\EndIf
+
+			\State $\var{route}.append(closest)$
+			\State $\var{capacity} \gets \var{capacity} + \var{c}$
+			\State $\var{excludelist}.append(closest)$
+
+		\EndWhile
+		\State $\var{routes}.append(route)$
+
+	\EndWhile
+
+	\State \textbf{return} $routes$
+	\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
+\section{Custom Local Search Algorithms}
+While having created the heuristics, which provides us with solutions to the initial problem instances, we can still optimize. This is where the Local Search Optimization algorithms comes into play. 
+Given a canonical solution, we want to optimize it to reduce the total cost of the solution. We have provided three custom Local Search (LS) algorithms, trying to optimize the canonical solution. 
+\newline
+The first LS algorithm looks into the generated routes done by the heuristics. It takes two routes and compare them with each other, checking whether any swaps are possible in the two routes. 
+A swap is possible if the distance is being reduced in at least one route, while still preserving the maximum capacity limit of both routes. 
+The second LS algorithm looks like the first but with a minor change. It takes one route and compares it with every other route to find a better solution. It then continues doing this 
+with every other route; take one route, compare it with every other route. 
+
+\section{Custom Local Search Algorithms 2}
+This localsearch algorithm for CVRP is inspired from the fact that if we wanted to find a customer point to move from one route to another, such point has to be the point that form convex hull of the route. We develop an algorithm from this fact to reduce number of comparison points of iteration each route by compute convex hull points of each route and only use those point as the candidate of interchanging points in routes. We also gain the addition benefit from haveing such list to estimate central of the route by computing average of convex hull point. We use the central point as the reference point of a route to find the closest point in others. These points are visulized in the figure, where lines are convex hull of a route. Point \(A\) and \(B\) are the closest points to central point from route \(i\) to route \(j\) (\(mid\_j\)) and from route \(j\) to \(i\) (\(mid\_i\)) respectively.
+
+\begin{figure}[H]
+	\caption{Convex hull points and central points of two routes}
+	\centering
+	\includegraphics[width=0.5\textwidth]{convexmidclosest.png}
+	\label{fig:localsearch1}
+
+\end{figure}
+
+
+We implemented an algorithm according to \cite{Berg97} which has runtime complexity of $O(nlogn)$. The iteration of our localsearch is given by pair of routes namely \(i\) and \(j\), we find the closest point from route \(i\) to \(j\) by comparing central point of convex \(i\) to central point of convex \(j\)and closest point from \(j\) to \(i\) respectively The possibilities of interchanging point from route \(i\) to \(j\) are following 3 cases
+\begin{enumerate}
+
+	\item If the capacity constain from moving \(i\) to \(j\) is not exceeded. We compare if moving closest customer point of \(i\) to \(j\) produces better route, if so, we proceed moving point from \(i\) to j
+
+	\item If the capacity constain from moving \(j\) to \(i\) is not exceeded. We compare if moving closest customer point of \(j\)to \(i\) produces better route, if so, we proceed moving point from \(j\)to i
+
+	\item if the capacity constain from switching closest customer point of \(i\) to \(j\)is not exceeded. We compare if switching points of two routes produces better route, if so, we switch the candidate point from route \(i\) to route \(j\) and \(j\) to \(i\) respectively.
+\end{enumerate}
+
+When we performing moving case (1 and 2) we should also take account of the tour order. As showing in figure \ref{fig:localsearch2}
+
+\begin{figure}[H]
+	\centering
+	\subfloat[Move Case]{\includegraphics[width=0.4\textwidth]{movepointtoroute.png}\label{fig:local_case1}}
+	\hfill
+
+	\subfloat[Swap Case]{\includegraphics[width=0.4\textwidth]{swapcase.png}\label{fig:local_case2}}
+
+\end{figure}
+
+Moving point E which is the closest point in route \(j\)to \(i\) is resulted in different tour between visiting E before \(B\)or after. Thus, it is necessary to compare cost between these two sub cases before perform moving operation. 
+% add figures
 
 \newpage
 \bibliographystyle{plain}
