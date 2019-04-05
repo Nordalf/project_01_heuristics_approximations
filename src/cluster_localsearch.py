@@ -37,8 +37,8 @@ class ClusterOPT:
                 for i in range(N)
                 for j in range(i+1, N))
 
-    def closest_point(self, target_point, points):
-        return self.solution.instance.closest_point(
+    def closest_customer_point(self, target_point, points):
+        return self.solution.instance.closest_customer_point(
             target_point, excluded=[0], included=points)
 
     def convex_opt_swap_if_improvement(self, tour_i, tour_j, closest_from_j_i, closest_from_i_j):
@@ -59,8 +59,8 @@ class ClusterOPT:
         # print("j:", old_distance_j > new_distance_j)
 
         # true means new distance makes better tour
-        print("all:", (old_distance_i + old_distance_j)
-              > new_distance_i + new_distance_j)
+        # print("all:", (old_distance_i + old_distance_j)
+        #       > new_distance_i + new_distance_j)
         if (old_distance_i + old_distance_j) > (new_distance_i + new_distance_j):
             tour_i[closest_from_j_i], tour_j[closest_from_i_j] = tour_j[closest_from_i_j], tour_i[closest_from_j_i]
             return True
@@ -101,7 +101,7 @@ class ClusterOPT:
                 tour_i.insert(closest_from_j_i+1, moved_point_j)
                 return True
 
-    def is_capacity_reach_when_swap(self, route_i, route_j, customer_i, customer_j):
+    def is_capacity_reached_when_swap(self, route_i, route_j, customer_i, customer_j):
         max_capacity = self.solution.instance.capacity
         # print("is_capacity_reach_when_swap", route_i,
         #       route_j, customer_i, customer_j)
@@ -109,9 +109,9 @@ class ClusterOPT:
             route_i) - self.solution.instance.node_capacity(customer_i) + self.solution.instance.node_capacity(customer_j)
         new_capacity_j = self.solution.route_index_capacity(
             route_j) - self.solution.instance.node_capacity(customer_j) + self.solution.instance.node_capacity(customer_i)
-        return new_capacity_i >= max_capacity and new_capacity_j >= max_capacity
+        return new_capacity_i >= max_capacity or new_capacity_j >= max_capacity
 
-    def is_capacity_reach_when_move(self, route_i, customer):
+    def is_capacity_reached_when_move(self, route_i, customer):
         max_capacity = self.solution.instance.capacity
         # print("curr capacity", self.solution.route_index_capacity(
         # route_i))
@@ -126,8 +126,9 @@ class ClusterOPT:
         while improvements:
             for (i, j) in self.cluster_permutation(len(routes)):
                 if len(routes[i]) == 1 or len(routes[j]) == 1:
+                    print("skip")
                     continue
-                # print("before", routes[i], routes[j])
+                # print("before {} and {}".format(i, j), routes[i], routes[j])
                 mid_point_i = self.mid_point(
                     [point[1] for point in self.route_convexes[i]])
                 mid_point_j = self.mid_point(
@@ -137,9 +138,9 @@ class ClusterOPT:
                                     for point in self.route_convexes[i]]
                 convex_indexed_j = [point[0]
                                     for point in self.route_convexes[j]]
-                i_j_index = self.closest_point(
+                i_j_index = self.closest_customer_point(
                     mid_point_i, convex_indexed_j)[0]
-                j_i_index = self.closest_point(
+                j_i_index = self.closest_customer_point(
                     mid_point_j, convex_indexed_i)[0]
                 if i_j_index == -1 or j_i_index == -1:
                     continue
@@ -149,17 +150,19 @@ class ClusterOPT:
 
                 # print(self.is_capacity_reach_when_swap(
                 #     i, j, routes[i][closest_from_j_i], routes[j][closest_from_i_j]))
-                if not self.is_capacity_reach_when_move(i, routes[j][closest_from_i_j]):
+
+                # print("current capacity_{}".format(i), self.solution.route_index_capacity(
+                #     i), "current capacity_{}".format(j), self.solution.route_index_capacity(j))
+
+                if not self.is_capacity_reached_when_move(i, routes[j][closest_from_i_j]):
                     improvements = self.convex_opt_move_if_improvement(
                         routes[i], routes[j], closest_from_i_j, closest_from_j_i)
-                elif not self.is_capacity_reach_when_move(j, routes[i][closest_from_j_i]):
+                elif not self.is_capacity_reached_when_move(j, routes[i][closest_from_j_i]):
                     improvements = self.convex_opt_move_if_improvement(
                         routes[j], routes[i], closest_from_j_i, closest_from_i_j)
-                elif not self.is_capacity_reach_when_swap(
+                elif not self.is_capacity_reached_when_swap(
                         i, j, routes[i][closest_from_j_i], routes[j][closest_from_i_j]):
 
-                    # print("current capacity_{}".format(i), self.solution.route_index_capacity(
-                    #     i), "current capacity_{}".format(j), self.solution.route_index_capacity(j))
                     # print("closest_from_{}_{}".format(i, j), closest_from_i_j,
                     #       "closest_from_{}_{}".format(j, i), closest_from_j_i)
                     # print("mid_point_{}".format(i), mid_point_i,
@@ -167,12 +170,17 @@ class ClusterOPT:
 
                     improvements = self.convex_opt_swap_if_improvement(
                         routes[i], routes[j], closest_from_j_i, closest_from_i_j)
+
+                # print("after capacity_{}".format(i), self.solution.route_index_capacity(
+                #     i), "after capacity_{}".format(j), self.solution.route_index_capacity(j))
                 if improvements:
-                    print("after", routes[i], routes[j])
+                    # print("after {} and {}".format(i, j), routes[i], routes[j])
                     self.route_convexes = [self.ch.convex_hull(route[:-1])
                                            for route in self.solution.routes]
 
             if bool(improvements) or improvements is None:
+                # check if route is removed from solution
+                routes = [route for route in routes if len(route) > 2]
                 return routes
             # debugging plot
             # style = 'bo-'

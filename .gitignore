@@ -231,3 +231,4 @@ TSWLatexianTemp*
 *.png
 *.sol
 .vscode
+*.tgz

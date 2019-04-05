@@ -1,4 +1,5 @@
 import sys
+from collections import deque
 
 
 class ThreeOpt:
@@ -22,7 +23,14 @@ class ThreeOpt:
         return ((i, j, k)
                 for i in range(N)
                 for j in range(i+2, N)
-                for k in range(j+2, N+(i > 0)))
+                for k in range(j + 2, N + (i > 0)))
+
+    @staticmethod
+    def rotate_til_depot_first(tour):
+        dq = deque(tour)
+        while dq[0] != 0:
+            dq.rotate()
+        return list(dq)
 
     def three_opt_if_improvement(self, tour, i, j, k):
         A, B, C, D, E, F = tour[i-1], tour[i], tour[j -
@@ -52,11 +60,13 @@ class ThreeOpt:
             improvements = True
             for (i, j, k) in self.three_opt_subsegments(len(tour)):
                 improvements = self.three_opt_if_improvement(tour, i, j, k)
+                if improvements and tour[0] != 0:
+                    tour = self.rotate_til_depot_first(tour)
             if bool(improvements) or improvements is None:
                 return tour
 
     def run(self):
         for route_index in range(len(self.solution.routes)):
-            self.solution.routes[route_index] = self.three_opt_first_gain(
-                self.solution.routes[route_index])
+            self.solution.routes[route_index][:-1] = self.three_opt_first_gain(
+                self.solution.routes[route_index][:-1])
         return self.solution

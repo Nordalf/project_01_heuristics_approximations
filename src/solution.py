@@ -27,12 +27,31 @@ class Solution:
         # Lets start of by checking the arcs of the solution.
         leavingVehicles = 0
         enteringVehicles = 0
+        max_capacity = self.instance.capacity
+        customer_visited = [
+            customer_point for route in self.routes for customer_point in route[1:-1]]
+
+        # check if visiting customer more than once
+        if len(customer_visited) != len(set(customer_visited)):
+            print("visited a customer more than once")
+            return False
+        if 0 in customer_visited:
+            print("visited depots in middle of tour")
+            return False
+
         for firstRoute in self.routes:
+            # checking capacity
+            route_capacity = sum([self.instance.route_capacity(firstRoute)])
+            if route_capacity > max_capacity:
+                return False
+
             if firstRoute[0] == 0:
                 leavingVehicles += 1
             if firstRoute[-1] == 0:
                 enteringVehicles += 1
+
             for secondRoute in self.routes:
+
                 if firstRoute != secondRoute:
                     # Constraint #1
                     # If there are any points greater than 0, then two routes intersect
@@ -42,11 +61,12 @@ class Solution:
 
         # Constraint #2
         if leavingVehicles == enteringVehicles:
-            print("Leaving Vehicles: \t", leavingVehicles,
-                  "\nEntering Vehicles: \t", enteringVehicles)
+            pass
+            # print("Leaving Vehicles: \t", leavingVehicles,
+            #       "\nEntering Vehicles: \t", enteringVehicles)
         else:
             isValid = False
-        print("The validity of the solution  is: ", isValid)
+        # print("The validity of the solution  is: ", isValid)
         return (isValid)
 
     def cost(self):
@@ -54,7 +74,7 @@ class Solution:
 
     def route_index_capacity(self, index):
         return self.instance.route_capacity(self.routes[index])
-    
+
     def write_to_file(self, filename):
         with open(filename, "w") as filehandle:
             for route in self.routes:
@@ -81,7 +101,7 @@ class Solution:
                 start = route[0]
                 plt.subplot(1, len(self.routes), index +
                             1, sharex=ax1, sharey=ax1)
-                self.plot_instance_points()
+                # self.plot_instance_points()
                 self.plot_lines(
                     list(route) + [start], color=colormap(index), style="o-")
                 # Mark the start city with a red square
@@ -90,7 +110,7 @@ class Solution:
             c = 0
             for route in self.routes:
                 start = route[0]
-                self.plot_instance_points()
+                # self.plot_instance_points()
                 self.plot_lines(
                     list(route) + [start], color=colormap(c), style="o-")
                 # Mark the start city with a red square
@@ -99,7 +119,7 @@ class Solution:
         if output_filename is None:
             plt.show()
         else:
-            plt.savefig("../results/"+output_filename)
+            plt.savefig(output_filename)
 
     @staticmethod
     def intersection(array1, array2):
@@ -113,20 +133,23 @@ class Solution:
         fig = plt.figure()
         #col_labels = ('KLB', 'CH Cost', 'CH Time (sec)', 'Custom CH Cost', 'Custom CH Time (sec)', 'Custom LS Cost', 'Custom LS Time (sec)')
         col_labels = ('KLB', 'CH Cost', 'CH Time (sec)')
-        
+
         # Draw table
         the_table = plt.table(cellText=table_vals,
-                            rowLabels=[inserted_row_labels],
-                            colLabels=col_labels,
-                            loc='center')
+                              rowLabels=[inserted_row_labels],
+                              colLabels=col_labels,
+                              loc='center')
         the_table.auto_set_font_size(False)
         the_table.set_fontsize(24)
         the_table.scale(6, 6)
 
         # Removing ticks and spines enables you to get the figure only with table
-        plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-        plt.tick_params(axis='y', which='both', right=False, left=False, labelleft=False)
-        for pos in ['right','top','bottom','left']:
+        plt.tick_params(axis='x', which='both', bottom=False,
+                        top=False, labelbottom=False)
+        plt.tick_params(axis='y', which='both', right=False,
+                        left=False, labelleft=False)
+        for pos in ['right', 'top', 'bottom', 'left']:
             plt.gca().spines[pos].set_visible(False)
 
-        plt.savefig("../results/"+outputfile_names+'.png', bbox_inches='tight', pad_inches=0.05)
+        plt.savefig("../results/"+outputfile_names+'.png',
+                    bbox_inches='tight', pad_inches=0.05)

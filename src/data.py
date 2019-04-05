@@ -123,7 +123,7 @@ class Data:
                     max_dist = distance
         return (max_index, max_dist)
 
-    def closest_point(self, i, excluded=[], included=[]):
+    def closest_customer_point(self, i, excluded=[], included=[]):
         min_index = -1
         min_dist = sys.maxsize
         if type(i) == Point:
@@ -131,6 +131,8 @@ class Data:
                 included = range(len(self.nodes))
             for index in included:
                 if index in excluded:
+                    continue
+                elif index == 0:
                     continue
                 else:
                     distance = self.distance(i, self.nodes[index]['pt'])
@@ -144,6 +146,8 @@ class Data:
                 included = range(len(self.nodes))
             for index in included:
                 if index == i or index in excluded:
+                    continue
+                elif index == 0:
                     continue
                 else:
                     distance = self.pre_distance(i, index)
