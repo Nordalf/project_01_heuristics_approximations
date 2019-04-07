@@ -5,6 +5,7 @@
 \usepackage[utf8x]{inputenc}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{subfig}
 \graphicspath{{images/}}
 \usepackage{parskip}
 \usepackage{fancyhdr}
@@ -224,7 +225,7 @@ We implemented an algorithm according to \cite{Berg97} which has runtime complex
 
 When we performing moving case (1 and 2) we should also take account of the tour order. As showing in figure \ref{fig:localsearch2}
 
-\begin{figure}[H]
+\begin{figure}[!tbp]
 	\centering
 	\subfloat[Move Case]{\includegraphics[width=0.4\textwidth]{movepointtoroute.png}\label{fig:local_case1}}
 	\hfill
@@ -234,7 +235,93 @@ When we performing moving case (1 and 2) we should also take account of the tour
 \end{figure}
 
 Moving point E which is the closest point in route \(j\)to \(i\) is resulted in different tour between visiting E before \(B\)or after. Thus, it is necessary to compare cost between these two sub cases before perform moving operation. 
-% add figures
+
+\begin{algorithm}[hbt!]
+	\caption{Cluster CVRP Localsearch}
+	\begin{algorithmic}[1]
+	\Require{$routes$: Solution routes} 
+	\Require{$maxcap$: Maximum capacity for each route} 
+	\Ensure{$routes$: Better Solution to the CVRP instance}
+	\Function{algorithm}{{$routes$, $maxcap$}}
+	\State $\var{improvements} \gets \text{True}$
+	\State $\var{route\_convexes} \gets \text{convex\_hull(routes)}$
+	\While{\texttt{$\var{improvements}$}}
+		\ForAll{$i$, $j$ in $routes\_permutation(len(route))$ }
+			\State $\var{central\_point\_i} \gets \text{sum(route\_convexes[i])/len(route\_convexes[i])}$
+
+			\State $\var{central\_point\_j} \gets \text{sum(route\_convexes[j])/len(route\_convexes[j])}$
+			
+			\State $\var{closest\_from\_i\_j} \gets \text{closest\_point(mid\_point\_i, convex\_routes[j])}$
+
+			\State $\var{closest\_from\_j\_i} \gets \text{closest\_point(mid\_point\_j, convex\_routes[i])}$
+
+			\If{$\var{closest\_from\_i\_j}$ is None or $\var{closest\_from\_j\_i}$ is None}
+				continue
+			\EndIf
+
+			
+			\If{\Not $ is\_capacity\_reached\_when\_move(\var{routes[j]}, \var{closest\_from\_i\_j}, \var{maxcap})$}
+				\State $\var{improvements} \gets move\_if\_improvement(\var{routes[i]}, \var{routes[j]},$\\\hspace{2.5cm}$ \var{closest\_from\_i\_j}, \var{closest\_from\_j\_i}$)
+			\ElsIf{\Not $is\_capacity\_reached\_when\_move(\var{routes[i]}, \var{closest\_from\_j\_i}, \var{maxcap})$}
+				\State $\var{improvements} \gets move\_if\_improvement(\var{routes[j]}, \var{routes[i]},$\\\hspace{2.5cm}$ \var{closest\_from\_i\_j}, \var{closest\_from\_j\_i}$)
+			\ElsIf{\Not $ is\_capacity\_reached\_when\_swap(\var{routes[i]}, \var{routes[j]}, \var{closest\_from\_j\_i}, \var{maxcap})$}
+
+				\State $\var{improvements} \gets swap\_if\_improvement(\var{routes[i]}, \var{routes[j]},$\\\hspace{2.5cm}$ \var{closest\_from\_j\_i}, \var{closest\_from\_i\_j}$)
+			\EndIf
+
+			\If{$\var{improvements}$}
+			
+				\State $\var{route\_convexes[i]} \gets convex\_hull(\var{routes[i]})$
+				\State $\var{route\_convexes[j]} \gets convex\_hull(\var{routes[j]})$
+				
+			\EndIf
+		\EndFor
+
+		\If{\Not $\var{improvements}$}
+			
+			\State $\var{routes} = elim\_empty\_routes(\var{routes})$
+			\Return $\var{routes}$
+		\EndIf
+	\EndWhile
+	\EndFunction
+
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Calculate $y = x^n$}
+\label{alg1}
+\begin{algorithmic}
+\REQUIRE $n \geq 0 \vee x \neq 0$
+\ENSURE $y = x^n$
+\STATE $y \leftarrow 1$
+\IF{$n < 0$}
+\STATE $X \leftarrow 1 / x$
+\STATE $N \leftarrow -n$
+\ELSE
+\STATE $X \leftarrow x$
+\STATE $N \leftarrow n$
+\ENDIF
+\WHILE{$N \neq 0$}
+\IF{$N$ is even}
+\STATE $X \leftarrow X \times X$
+\STATE $N \leftarrow N / 2$
+\ELSE[$N$ is odd]
+\STATE $y \leftarrow y \times X$
+\STATE $N \leftarrow N - 1$
+\ENDIF
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[hbt!]
+	\begin{algorithmic}[1]
+
+	\Function{move_if_improvement}{{$route\_i$, $route\_j$, $i\_to\_j$, $j\_to\_i$}}
+	aa
+	\EndFunction
+	\end{algorithmic}
+\end{algorithm}
 
 \newpage
 \bibliographystyle{plain}

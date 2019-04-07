@@ -125,9 +125,6 @@ class ClusterOPT:
         improvements = True
         while improvements:
             for (i, j) in self.cluster_permutation(len(routes)):
-                if len(routes[i]) == 1 or len(routes[j]) == 1:
-                    print("skip")
-                    continue
                 # print("before {} and {}".format(i, j), routes[i], routes[j])
                 mid_point_i = self.mid_point(
                     [point[1] for point in self.route_convexes[i]])
@@ -142,6 +139,7 @@ class ClusterOPT:
                     mid_point_i, convex_indexed_j)[0]
                 j_i_index = self.closest_customer_point(
                     mid_point_j, convex_indexed_i)[0]
+                    
                 if i_j_index == -1 or j_i_index == -1:
                     continue
 

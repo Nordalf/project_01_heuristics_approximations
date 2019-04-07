@@ -41,18 +41,7 @@ def solve(instance, alg, config):
     for i in range(len(sol.routes)):
         print("[{}]".format(i), sol.routes[i])
 
-    
-    ls_alg = ThreeOpt(sol).run
-    ls = LocalSearch(solution=sol, alg=ls_alg)
-    try:
-        sol = ls.construct(config.time_limit-t0)
-    except TimeOutExeption as e:
-        print("timeout")
-        sol = e.solution
-
-    print("after 3opt")
-    for i in range(len(sol.routes)):
-        print("[{}]".format(i), sol.routes[i])
+    chh_cost = sol.cost()
 
     ls_alg = ClusterOPT(sol).run
     ls = LocalSearch(solution=sol, alg=ls_alg)
@@ -62,7 +51,40 @@ def solve(instance, alg, config):
         print("timeout")
         sol = e.solution
         
-    print("after clusterOPT")
+    cluster_opt_cost = sol.cost()
+
+    print("after clusterOPT", chh_cost - cluster_opt_cost)
+    for i in range(len(sol.routes)):
+        print("[{}]".format(i), sol.routes[i])
+
+    
+    ls_alg = TwoOPT(sol).run
+    ls = LocalSearch(solution=sol, alg=ls_alg)
+    try:
+        sol = ls.construct(config.time_limit-t0)
+    except TimeOutExeption as e:
+        print("timeout")
+        sol = e.solution
+
+    two_opt_cost = sol.cost()
+
+    print("after 2opt", cluster_opt_cost - two_opt_cost)
+
+    for i in range(len(sol.routes)):
+        print("[{}]".format(i), sol.routes[i])
+
+    
+    ls_alg = ThreeOpt(sol).run
+    ls = LocalSearch(solution=sol, alg=ls_alg)
+    try:
+        sol = ls.construct(config.time_limit-t0)
+    except TimeOutExeption as e:
+        print("timeout")
+        sol = e.solution
+
+    three_opt_cost = sol.cost()
+
+    print("after 3opt", two_opt_cost - three_opt_cost)
     for i in range(len(sol.routes)):
         print("[{}]".format(i), sol.routes[i])
     
