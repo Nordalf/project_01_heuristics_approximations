@@ -3,7 +3,8 @@
 import argparse
 
 import sys
-# import os
+import os
+import fnmatch
 import data
 import time
 import solution
@@ -98,7 +99,31 @@ def solve(instance, alg, config):
     return sol
 
 
+# Print the time it takes to resolve and the cost of the algorithm into a .dat file
+# This will make it possible for LaTeX to make the plots
+# Draw graphs to show the performance
+def performance_testing():
+    ch = ConstructionHeuristics(instance, alg)
+    try:
+        sol = ch.construct(config.time_limit-t0)
+        temp_instance_times_costs += [0, sol.cost(), round(t0,2)]
+    except TimeOutExeption as e:
+        print("timeout")
+        sol = e.solution
+    
+    # Heuristics
+    h_alg = [solverNN.algorithm, solverCHH.algorithm]
+    # Local Search
+    ls_alg = []
+
+    for path, subdirs, files in os.walk('../data'):
+        for name in files:
+            if(name, "*.xml"):
+                sol = solve(name, alg, config)
+                print(os.path.join(path, name))
+
 def main(argv):
+    performance_testing()
 
     parser = argparse.ArgumentParser()
 
@@ -127,10 +152,6 @@ def main(argv):
 
     config = parser.parse_args()
 
-    # if config.all:
-    #     for file in os.walk("../data"):
-    #         print(file)
-
     print('instance_file    = {!r}'.format(config.instance_file))
     print('output_file      = {!r}'.format(config.output_file))
     print('time_limit       = {!r}'.format(config.time_limit))
@@ -149,8 +170,8 @@ def main(argv):
             sol.plot_routes(split=config.split_route,
                             output_filename=config.output_file+'_sol'+'.png')
         sol.write_to_file(config.output_file+'.sol')
-    #     print(instance_times_costs)
-    #     sol.plot_table(config.output_file+'_tbl', instance.instance_name, instance_times_costs)
+        # print(instance_times_costs)
+        sol.plot_table(config.output_file+'_tbl', instance.instance_name, instance_times_costs)
     print("{} routes with total cost {:.1f}"
           .format(len(sol.routes), sol.cost()))
 
