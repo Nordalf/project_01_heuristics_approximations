@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from data import Point
 
 
 class ConvexHull():
@@ -33,8 +34,15 @@ class ConvexHull():
 
     def convex_hull(self, points):
         """
-            points is an array of Point
+            points is an array of instance's customer index
         """
+        # print("points", points)
+        points = [(customer_index, self.instance.nodes[customer_index]['pt'])
+                  for customer_index in points]
+
+        if len(points) <= 2:
+            return points
+            
         # 1. Sort the points by x-coordinate, resulting in a sequence p1,..., pn.
         sorted_points = sorted(points, key=lambda point: point[1])
         l_upper = [sorted_points[0], sorted_points[1]]
@@ -51,14 +59,6 @@ class ConvexHull():
             while len(l_lower) > 3 and not self.is_turn_right(l_lower[-3][1], l_lower[-2][1], l_lower[-1][1]):
                 del l_lower[-2]
         l_lower = l_lower[1:-1]
-        convex = l_upper + l_lower
-        style = 'bo-'
-        plt.plot()
-
-        for (label, p) in points:
-            plt.text(p.x, p.y, '  ' + str(label))
-        plt.plot([point[1].x for point in convex] + [convex[0][1].x], [
-                point[1].y for point in convex] + [convex[0][1].y], style)
-        plt.show()
-
+        
         return l_upper + l_lower
+        # return list(dict.fromkeys(l_upper + l_lower))

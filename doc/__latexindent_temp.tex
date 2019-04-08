@@ -234,15 +234,13 @@ When we performing moving case (1 and 2) we should also take account of the tour
 
 \end{figure}
 
-Moving point E which is the closest point in route \(j\)to \(i\) is resulted in different tour between visiting E before \(B\)or after. Thus, it is necessary to compare cost between these two sub cases before perform moving operation as showing in Line 9 of Algorithm 5. 
+Moving point E which is the closest point in route \(j\)to \(i\) is resulted in different tour between visiting E before \(B\)or after. Thus, it is necessary to compare cost between these two sub cases before perform moving operation. 
 
 \begin{algorithm}[hbt!]
 	\caption{Cluster CVRP Localsearch}
 	\begin{algorithmic}[1]
-	\Require{$closest_point(A, points)$: returns point in points which hase minimum distance from A} 
-	\Require{$is\_capacity\_reached\_when\_move(route, A)$: returns True if capacity of given route is satisfy after add point A}
-	\Require{$is\_capacity\_reached\_when\_move(route1, route2, A, B)$: returns True if capacity of given routes is satisfy swap  point A of route1 with point B of route2}
-	\Require{$elim\_empty\_routes$: returns list of routes where there empty route(contain only depot point) is removed}
+	\Require{$routes$: Solution routes} 
+	\Require{$maxcap$: Maximum capacity for each route} 
 	\Ensure{$routes$: Better Solution to the CVRP instance}
 	\Function{algorithm}{{$routes$, $maxcap$}}
 	\State $\var{improvements} \gets \text{True}$
@@ -262,11 +260,11 @@ Moving point E which is the closest point in route \(j\)to \(i\) is resulted in 
 			\EndIf
 
 			
-			\If{\textbf{not} $ is\_capacity\_reached\_when\_move(\var{routes[j]}, \var{closest\_from\_i\_j})$}
+			\If{\Not $ is\_capacity\_reached\_when\_move(\var{routes[j]}, \var{closest\_from\_i\_j}, \var{maxcap})$}
 				\State $\var{improvements} \gets move\_if\_improvement(\var{routes[i]}, \var{routes[j]},$\\\hspace{2.5cm}$ \var{closest\_from\_i\_j}, \var{closest\_from\_j\_i}$)
-			\ElsIf{\textbf{not} $is\_capacity\_reached\_when\_move(\var{routes[i]}, \var{closest\_from\_j\_i})$}
+			\ElsIf{\Not $is\_capacity\_reached\_when\_move(\var{routes[i]}, \var{closest\_from\_j\_i}, \var{maxcap})$}
 				\State $\var{improvements} \gets move\_if\_improvement(\var{routes[j]}, \var{routes[i]},$\\\hspace{2.5cm}$ \var{closest\_from\_i\_j}, \var{closest\_from\_j\_i}$)
-			\ElsIf{\textbf{not} $ is\_capacity\_reached\_when\_swap(\var{routes[i]}, \var{routes[j]}, \var{closest\_from\_j\_i})$}
+			\ElsIf{\Not $ is\_capacity\_reached\_when\_swap(\var{routes[i]}, \var{routes[j]}, \var{closest\_from\_j\_i}, \var{maxcap})$}
 
 				\State $\var{improvements} \gets swap\_if\_improvement(\var{routes[i]}, \var{routes[j]},$\\\hspace{2.5cm}$ \var{closest\_from\_j\_i}, \var{closest\_from\_i\_j}$)
 			\EndIf
@@ -279,7 +277,8 @@ Moving point E which is the closest point in route \(j\)to \(i\) is resulted in 
 			\EndIf
 		\EndFor
 
-		\If{\textbf{not} $\var{improvements}$}
+		\If{\Not $\var{improvements}$}
+			
 			\State $\var{routes} = elim\_empty\_routes(\var{routes})$
 			\Return $\var{routes}$
 		\EndIf
@@ -289,66 +288,38 @@ Moving point E which is the closest point in route \(j\)to \(i\) is resulted in 
 	\end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}[hbt!]
-	\caption{swap\_if\_improvement}
-	\begin{algorithmic}[1]
-		\Require{$dist(A,B)$ returns distance from point A to B}
-	\Function{swap\_if\_improvement}{{$route\_i, route\_j, j\_to\_i, i\_to\_j$}}
-
-	\State $\var{A}, \var{B}, \var{C} \gets \var{route\_i[i\_to\_j -1]}, \var{route\_i[i\_to\_j]}, \var{route\_i[i\_to\_j+1 \% len(route\_i)]}$
-
-	\State $\var{D}, \var{E}, \var{F} \gets \var{route\_j[j\_to\_i -1]}, \var{route\_j[j\_to\_i]}, \var{route\_j[j\_to\_i+1 \% len(route\_j)]}$
-
-	\State $\var{old\_distance\_i} \gets dist(\var{A},\var{B}) + dist(\var{B},\var{C})$
-	\State $\var{old\_distance\_j} \gets dist(\var{D},\var{E}) + dist(\var{E},\var{F})$
-
-	\State $\var{new\_distance\_i} \gets dist(\var{A},\var{E}) + dist(\var{E},\var{C})$
-	\State $\var{new\_distance\_j} \gets dist(\var{D},\var{B}) + dist(\var{B},\var{F})$
-
-	\If{$\var{old\_distance\_i} + \var{old\_distance\_j} > \var{new\_distance\_i} + \var{new\_distance\_j}$}
-		swap point B of route i with point E of route j
-		\Return True
-	\EndIf
-	\EndFunction
-
-	\end{algorithmic}
+\begin{algorithm}
+\caption{Calculate $y = x^n$}
+\label{alg1}
+\begin{algorithmic}
+\REQUIRE $n \geq 0 \vee x \neq 0$
+\ENSURE $y = x^n$
+\STATE $y \leftarrow 1$
+\IF{$n < 0$}
+\STATE $X \leftarrow 1 / x$
+\STATE $N \leftarrow -n$
+\ELSE
+\STATE $X \leftarrow x$
+\STATE $N \leftarrow n$
+\ENDIF
+\WHILE{$N \neq 0$}
+\IF{$N$ is even}
+\STATE $X \leftarrow X \times X$
+\STATE $N \leftarrow N / 2$
+\ELSE[$N$ is odd]
+\STATE $y \leftarrow y \times X$
+\STATE $N \leftarrow N - 1$
+\ENDIF
+\ENDWHILE
+\end{algorithmic}
 \end{algorithm}
 
-
 \begin{algorithm}[hbt!]
-	\caption{move\_if\_improvement}
 	\begin{algorithmic}[1]
-		\Require{$dist(A,B)$ returns distance from point A to B}
-	\Function{move\_if\_improvement}{{$route\_i, route\_j, i\_to\_j, j\_to\_i$}}
 
-	\State $\var{A}, \var{B}, \var{C} \gets \var{route\_i[i\_to\_j -1]}, \var{route\_i[i\_to\_j]}, \var{route\_i[i\_to\_j+1 \% len(route\_i)]}$
-
-	\State $\var{D}, \var{E}, \var{F} \gets \var{route\_j[j\_to\_i -1]}, \var{route\_j[j\_to\_i]}, \var{route\_j[j\_to\_i+1 \% len(route\_j)]}$
-
-
-	\State $\var{old\_distance\_i} \gets dist(\var{A},\var{B}) + dist(\var{B},\var{C})$
-	\State $\var{old\_distance\_j} \gets dist(\var{D},\var{E}) + dist(\var{E},\var{F})$
-
-	\State $\var{new\_dist\_before\_B} \gets dist(\var{A},\var{E}) + dist(\var{E},\var{B}) + dist(\var{B},\var{C})$ 
-
-	\State $\var{new\_dist\_after\_B} \gets dist(\var{A},\var{B}) + dist(\var{B},\var{E}) + dist(\var{E},\var{C})$ 
-
-	\State $\var{new\_distance\_j} \gets dist(\var{D},\var{F})$
-
-	\If{$\var{new\_dist\_before\_B} < {new\_dist\_after\_B}$}
-
-		\If{$\var{old\_distance\_i} + \var{old\_distance\_j} > \var{new\_dist\_before\_B} + \var{new\_distance\_j}$}
-			move point E from route j to route i before B
-		\EndIf
-	\Else
-
-		\If{$\var{old\_distance\_i} + \var{old\_distance\_j} > \var{new\_dist\_after\_B} + \var{new\_distance\_j}$}
-			move point E from route j to route i after B
-
-		\EndIf
-	\EndIf
+	\Function{move_if_improvement}{{$route\_i$, $route\_j$, $i\_to\_j$, $j\_to\_i$}}
+	aa
 	\EndFunction
-
 	\end{algorithmic}
 \end{algorithm}
 

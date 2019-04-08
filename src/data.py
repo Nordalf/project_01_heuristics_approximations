@@ -104,11 +104,16 @@ class Data:
         "The distance between two points."
         return round(abs(A - B), self.decimals)
 
-    def furthest_point(self, i, excluded=[], include=[]):
+    def node_capacity(self, node_index):
+        return self.nodes[node_index]["rq"]
+
+    def furthest_point(self, i, excluded=[], included=[]):
         max_index = -1
         max_dist = -sys.maxsize-1
         i = int(i)
-        for index in range(len(self.nodes)):
+        if len(included) == 0:
+            included = range(len(self.nodes))
+        for index in included:
             if index == i or index in excluded:
                 continue
             else:
@@ -118,19 +123,41 @@ class Data:
                     max_dist = distance
         return (max_index, max_dist)
 
-    def closest_point(self, i, excluded=[]):
+    def closest_customer_point(self, i, excluded=[], included=[]):
         min_index = -1
         min_dist = sys.maxsize
-        i = int(i)
-        for index in range(len(self.nodes)):
-            if index == i or index in excluded:
-                continue
-            else:
-                distance = self.pre_distance(i, index)
-                if distance < min_dist:
-                    min_index = index
-                    min_dist = distance
-        return (min_index, min_dist)
+        if type(i) == Point:
+            if len(included) == 0:
+                included = range(len(self.nodes))
+            for index in included:
+                if index in excluded:
+                    continue
+                elif index == 0:
+                    continue
+                else:
+                    distance = self.distance(i, self.nodes[index]['pt'])
+                    if distance < min_dist:
+                        min_index = index
+                        min_dist = distance
+            return (min_index, min_dist)
+        else:
+            i = int(i)
+            if len(included) == 0:
+                included = range(len(self.nodes))
+            for index in included:
+                if index == i or index in excluded:
+                    continue
+                elif index == 0:
+                    continue
+                else:
+                    distance = self.pre_distance(i, index)
+                    if distance < min_dist:
+                        min_index = index
+                        min_dist = distance
+            return (min_index, min_dist)
+
+    def route_capacity(self, route):
+        return sum(self.node_capacity(point_index) for point_index in route)
 
     def route_length(self, route):
         return sum(self.pre_distance(route[i], route[i-1]) for i in range(len(route)))

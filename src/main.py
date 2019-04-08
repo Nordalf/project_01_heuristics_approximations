@@ -3,7 +3,7 @@
 import argparse
 
 import sys
-import os
+# import os
 import data
 import time
 import solution
@@ -22,13 +22,6 @@ from cluster_localsearch import ClusterOPT
 from local_search import LocalSearch
 
 import matplotlib.pyplot as plt
-# @my_logger
-# @my_timer
-
-plt.figure(figsize=(20, 10))
-
-# @my_logger
-# @my_timer
 
 # Used for table creation
 instance_times_costs = []
@@ -44,7 +37,41 @@ def solve(instance, alg, config):
     except TimeOutExeption as e:
         print("timeout")
         sol = e.solution
-    print(sol.routes)
+    print("first sol")
+    for i in range(len(sol.routes)):
+        print("[{}]".format(i), sol.routes[i])
+
+    chh_cost = sol.cost()
+
+    ls_alg = ClusterOPT(sol).run
+    ls = LocalSearch(solution=sol, alg=ls_alg)
+    try:
+        sol = ls.construct(config.time_limit-t0)
+    except TimeOutExeption as e:
+        print("timeout")
+        sol = e.solution
+        
+    cluster_opt_cost = sol.cost()
+
+    print("after clusterOPT", chh_cost - cluster_opt_cost)
+    for i in range(len(sol.routes)):
+        print("[{}]".format(i), sol.routes[i])
+
+    
+    ls_alg = TwoOPT(sol).run
+    ls = LocalSearch(solution=sol, alg=ls_alg)
+    try:
+        sol = ls.construct(config.time_limit-t0)
+    except TimeOutExeption as e:
+        print("timeout")
+        sol = e.solution
+
+    two_opt_cost = sol.cost()
+
+    print("after 2opt", cluster_opt_cost - two_opt_cost)
+
+    for i in range(len(sol.routes)):
+        print("[{}]".format(i), sol.routes[i])
 
     
     ls_alg = ThreeOpt(sol).run
@@ -55,19 +82,17 @@ def solve(instance, alg, config):
         print("timeout")
         sol = e.solution
 
-    # ls_alg = ClusterOPT(sol).run
-    # ls = LocalSearch(solution=sol, alg=ls_alg)
-    # try:
-    #     sol = ls.construct(config.time_limit-t0)
-    # except TimeOutExeption as e:
-    #     print("timeout")
-    #     sol = e.solution
-    # print(sol.routes)
+    three_opt_cost = sol.cost()
+
+    print("after 3opt", two_opt_cost - three_opt_cost)
+    for i in range(len(sol.routes)):
+        print("[{}]".format(i), sol.routes[i])
     
     # t0 = time.clock()
     # ls = solverLS.LocalSearch(instance)
     # sol = ls.local_search(sol, config.time_limit-t0) # returns an object of type Solution
-    assert sol.valid_solution()
+    if not sol.valid_solution():
+        sys.exit(-1)
     instance_times_costs += [temp_instance_times_costs+[]]
     temp_instance_times_costs = []
     return sol
@@ -90,6 +115,9 @@ def main(argv):
     parser.add_argument('-s', dest="split_route", action='store_true',
                         help='Split the route to different subplot')
 
+    parser.add_argument('-g', dest="graphic_sol", action='store_true',
+                        help='graphical solution')
+
     parser.add_argument('instance_file', action='store',
                         help='The path to the file of the instance to solve')
 
@@ -99,30 +127,34 @@ def main(argv):
 
     config = parser.parse_args()
 
-    if config.all:
-        for file in os.walk("../data"):
-            print(file)
+    # if config.all:
+    #     for file in os.walk("../data"):
+    #         print(file)
 
     print('instance_file    = {!r}'.format(config.instance_file))
     print('output_file      = {!r}'.format(config.output_file))
     print('time_limit       = {!r}'.format(config.time_limit))
+    print('graphical solution= {!r}'.format(config.graphic_sol))
     print('split route       = {!r}'.format(config.split_route))
 
     instance = data.Data(config.instance_file)
 
-    alg = solverNN.algorithm
-    #alg = solverCHH.algorithm
+    # alg = solverNN.algorithm
+    alg = solverCHH.algorithm
     sol = solve(instance, alg, config)
-
     if config.output_file is not None:
-        sol.plot_routes(split=config.split_route,
-                        output_filename=config.output_file+'_sol'+'.png')
-        sol.write_to_file("../results/"+config.output_file+'.sol')
-        print(instance_times_costs)
-        sol.plot_table(config.output_file+'_tbl', instance.instance_name, instance_times_costs)
+        if config.graphic_sol:
+            plt.figure(figsize=(20, 10))
+            plt.rcParams.update({'font.size': 22})
+            sol.plot_routes(split=config.split_route,
+                            output_filename=config.output_file+'_sol'+'.png')
+        sol.write_to_file(config.output_file+'.sol')
+    #     print(instance_times_costs)
+    #     sol.plot_table(config.output_file+'_tbl', instance.instance_name, instance_times_costs)
     print("{} routes with total cost {:.1f}"
           .format(len(sol.routes), sol.cost()))
 
 
 if __name__ == "__main__":
     main(sys.argv[1:])
+    sys.exit(0)
