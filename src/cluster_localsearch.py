@@ -173,9 +173,8 @@ class ClusterOPT:
                 #     i), "after capacity_{}".format(j), self.solution.route_index_capacity(j))
                 if improvements:
                     # print("after {} and {}".format(i, j), routes[i], routes[j])
-                    self.route_convexes = [self.ch.convex_hull(route[:-1])
-                                           for route in self.solution.routes]
-
+                    self.route_convexes[i] = self.ch.convex_hull(routes[i])
+                    self.route_convexes[j] = self.ch.convex_hull(routes[j])
             if bool(improvements) or improvements is None:
                 # check if route is removed from solution
                 routes = [route for route in routes if len(route) > 2]
