@@ -10,8 +10,7 @@ class Solution:
 
     def __init__(self, instance):
         self.instance = instance
-        # the initialization for the containers for your solutions representation here
-        pass
+        self.routes = []
 
     def __repr__(self):
         return str(self.__class__) + ": " + str(self.__dict__)

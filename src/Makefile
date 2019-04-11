@@ -21,6 +21,9 @@ clean :
 submission : clean
 	tar -cvzf ../src.tgz ../src/
 
+performancetest: 
+	$(PY) main.py -t 60 -performancetest true
+
 %.profile: main.py
 	# sudo pip install cProfile
 	# sudo pip install snakeviz

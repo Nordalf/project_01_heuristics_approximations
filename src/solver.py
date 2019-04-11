@@ -30,5 +30,6 @@ class ConstructionHeuristics:
         return self.canonical_solution()
 
     def canonical_solution(self):
+        self.solution = solution.Solution(self.instance)
         self.solution = self.alg(self.instance, self.solution)
         return self.solution
