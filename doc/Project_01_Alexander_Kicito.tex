@@ -149,10 +149,12 @@ By choosing such approach to attack the Vehicle Routing Problem, we can ensure p
 The heuristic algorithm has the following behaviour: (1) Pick a customer point furthest from away from the depot, which is not in the solution route;
 (2) Repeatly find nearest customer point from (1), which is not in any solution route and group such point together until the capacity is reached and save the points as a cluster; (3) Repeat (1) and (2) until we cover all customer points
 
+The complexity of this algorithm is $O(n^2)$ since the main while loop terminates after we covered all customer points in given instance and for each iteration of while, we assume that we have auxiliary data structure stored distance between one point to another it can be perfrom in $O(n)$ time.
+
 \begin{algorithm}[hbt!]
 	\caption{Custom CVRP Heuristic - Clustering Approach}
 	\begin{algorithmic}[1]
-	\Require{$Points$: List of customer Points} 
+	\Require{$customers$: List of customer Points} 
 	\Require{$depot$: Depot Point} 
 	\Require{$maxcap$: Maximum capacity for each route} 
 	\Ensure{$routes$: Solution to the CVRP instance}
@@ -168,7 +170,7 @@ The heuristic algorithm has the following behaviour: (1) Pick a customer point f
 	\State $\var{excludelist}.append(startpoint)$
 	\State $\var{route}.append(startpoint)$
 	\State $\var{capacity} \gets \var{capacity} + \var{startpoint.capacity}$
-		\While{\texttt{$len(excludelist) \le len(customers)$}}
+		\While{\texttt{$excludelist.length \le customers.length$}}
 
 			\State $\var{closest} \gets closestpoint(startpoint, excludelist)$
 
@@ -178,12 +180,12 @@ The heuristic algorithm has the following behaviour: (1) Pick a customer point f
 				\text{break}
 			\EndIf
 
-			\State $\var{route}.append(closest)$
 			\State $\var{capacity} \gets \var{capacity} + \var{c}$
-			\State $\var{excludelist}.append(closest)$
+			\State add closest to route
+			\State add closest to excludelist
 
 		\EndWhile
-		\State $\var{routes}.append(route)$
+		\State add route to result set routes
 
 	\EndWhile
 
@@ -223,7 +225,7 @@ We implemented an algorithm according to \cite{Berg97} which has runtime complex
 	\item if the capacity constain from switching closest customer point of \(i\) to \(j\)is not exceeded. We compare if switching points of two routes produces better route, if so, we switch the candidate point from route \(i\) to route \(j\) and \(j\) to \(i\) respectively.
 \end{enumerate}
 
-When we performing moving case (1 and 2) we should also take account of the tour order. As showing in figure \ref{fig:localsearch2}
+When we performing moving case (1 and 2) we should also take account of the tour order. As showing in figure \ref{fig:local_case1}
 
 \begin{figure}[!tbp]
 	\centering
@@ -234,21 +236,26 @@ When we performing moving case (1 and 2) we should also take account of the tour
 
 \end{figure}
 
-Moving point E which is the closest point in route \(j\)to \(i\) is resulted in different tour between visiting E before \(B\)or after. Thus, it is necessary to compare cost between these two sub cases before perform moving operation as showing in Line 9 of Algorithm 5. 
+Moving point E which is the closest point in route \(j\)to \(i\) is resulted in different tour between visiting E before \(B\)or after. Thus, it is necessary to compare cost between these two sub cases before perform moving operation as showing in Line 9 of Algorithm 5. The complexity in main for all loop is $O(n^2)$ and all operation inside the loop has complexity at most $O(n)$ if we have the improvement of route, we recompute the convex\_hull of 2 routes, thus, the complexity of each iteration of this localsearch is at most $O(n^3logn)$
+
 
 \begin{algorithm}[hbt!]
 	\caption{Cluster CVRP Localsearch}
 	\begin{algorithmic}[1]
-	\Require{$closest_point(A, points)$: returns point in points which hase minimum distance from A} 
+	\Require{$convex\_hull(points)$: returns points such that it makes convex hull } 
+	\Require{$closest\_point(A, points)$: returns point in points which hase minimum distance from A} 
 	\Require{$is\_capacity\_reached\_when\_move(route, A)$: returns True if capacity of given route is satisfy after add point A}
 	\Require{$is\_capacity\_reached\_when\_move(route1, route2, A, B)$: returns True if capacity of given routes is satisfy swap  point A of route1 with point B of route2}
 	\Require{$elim\_empty\_routes$: returns list of routes where there empty route(contain only depot point) is removed}
 	\Ensure{$routes$: Better Solution to the CVRP instance}
 	\Function{algorithm}{{$routes$, $maxcap$}}
+	\State $\var{route\_convexes}$ is an array storing convex\_hull for each route  
+	\For{$i$ = 0; $i < routes.length$; $i++$}
+		\State $\var{route\_convexes}[i] \gets convex\_hull(\var{routes[i]}$)
+	\EndFor
 	\State $\var{improvements} \gets \text{True}$
-	\State $\var{route\_convexes} \gets \text{convex\_hull(routes)}$
 	\While{\texttt{$\var{improvements}$}}
-		\ForAll{$i$, $j$ in $routes\_permutation(len(route))$ }
+		\ForAll{$i$, $j$ such that $i$, $j$ are routes index combination}
 			\State $\var{central\_point\_i} \gets \text{sum(route\_convexes[i])/len(route\_convexes[i])}$
 
 			\State $\var{central\_point\_j} \gets \text{sum(route\_convexes[j])/len(route\_convexes[j])}$
