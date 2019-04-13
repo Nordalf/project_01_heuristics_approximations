@@ -92,7 +92,7 @@ Lastly, we are going to compare our own ideas against more common used algorithm
 
 \newpage
 
-\section{Custom Heuristics Algorithms}
+\section{Custom Heuristics Algorithms} 
 
 
 The first algorithm, which we have created, takes the approach of the Nearest Neighbour idea. Given an instance of CVRP, the starting point \- the depot where the vehicles are being loaded with customer requests \- is the point, where all calculations start. 
@@ -203,7 +203,7 @@ A swap is possible if the distance is being reduced in at least one route, while
 The second LS algorithm looks like the first but with a minor change. It takes one route and compares it with every other route to find a better solution. It then continues doing this 
 with every other route; take one route, compare it with every other route. 
 
-\section{Custom Local Search Algorithms 2}
+\section{Custom Local Search Algorithms 2} \label{ls2}
 This localsearch algorithm for CVRP is inspired from the fact that if we wanted to find a customer point to move from one route to another, such point has to be the point that form convex hull of the route. We develop an algorithm from this fact to reduce number of comparison points of iteration each route by compute convex hull points of each route and only use those point as the candidate of interchanging points in routes. We also gain the addition benefit from haveing such list to estimate central of the route by computing average of convex hull point. We use the central point as the reference point of a route to find the closest point in others. These points are visulized in the figure, where lines are convex hull of a route. Point \(A\) and \(B\) are the closest points to central point from route \(i\) to route \(j\) (\(mid\_j\)) and from route \(j\) to \(i\) (\(mid\_i\)) respectively.
 
 \begin{figure}[H]
@@ -242,49 +242,37 @@ Moving point E which is the closest point in route \(j\)to \(i\) is resulted in 
 \begin{algorithm}[hbt!]
 	\caption{Cluster CVRP Localsearch}
 	\begin{algorithmic}[1]
-	\Require{$convex\_hull(points)$: returns points such that it makes convex hull } 
 	\Require{$closest\_point(A, points)$: returns point in points which hase minimum distance from A} 
-	\Require{$is\_capacity\_reached\_when\_move(route, A)$: returns True if capacity of given route is satisfy after add point A}
-	\Require{$is\_capacity\_reached\_when\_move(route1, route2, A, B)$: returns True if capacity of given routes is satisfy swap  point A of route1 with point B of route2}
-	\Require{$elim\_empty\_routes$: returns list of routes where there empty route(contain only depot point) is removed}
+	\Require{$elim\_empty\_routes$: returns list of routes where the empty routes are removed}
 	\Ensure{$routes$: Better Solution to the CVRP instance}
 	\Function{algorithm}{{$routes$, $maxcap$}}
 	\State $\var{route\_convexes}$ is an array storing convex\_hull for each route  
-	\For{$i$ = 0; $i < routes.length$; $i++$}
-		\State $\var{route\_convexes}[i] \gets convex\_hull(\var{routes[i]}$)
-	\EndFor
 	\State $\var{improvements} \gets \text{True}$
 	\While{\texttt{$\var{improvements}$}}
 		\ForAll{$i$, $j$ such that $i$, $j$ are routes index combination}
-			\State $\var{central\_point\_i} \gets \text{sum(route\_convexes[i])/len(route\_convexes[i])}$
+			\State $\var{central\_point\_i} \gets$ average of point in convex i
 
-			\State $\var{central\_point\_j} \gets \text{sum(route\_convexes[j])/len(route\_convexes[j])}$
+			\State $\var{central\_point\_j} \gets$ average of point in convex j
 			
 			\State $\var{closest\_from\_i\_j} \gets \text{closest\_point(mid\_point\_i, convex\_routes[j])}$
 
 			\State $\var{closest\_from\_j\_i} \gets \text{closest\_point(mid\_point\_j, convex\_routes[i])}$
 
-			\If{$\var{closest\_from\_i\_j}$ is None or $\var{closest\_from\_j\_i}$ is None}
-				continue
-			\EndIf
-
+			\If{$\var{closest\_from\_i\_j}$ and $\var{closest\_from\_j\_i}$ is Found}
 			
-			\If{\textbf{not} $ is\_capacity\_reached\_when\_move(\var{routes[j]}, \var{closest\_from\_i\_j})$}
+			\If{$closest\_from\_i\_j$ fits in route j}
 				\State $\var{improvements} \gets move\_if\_improvement(\var{routes[i]}, \var{routes[j]},$\\\hspace{2.5cm}$ \var{closest\_from\_i\_j}, \var{closest\_from\_j\_i}$)
-			\ElsIf{\textbf{not} $is\_capacity\_reached\_when\_move(\var{routes[i]}, \var{closest\_from\_j\_i})$}
+			\ElsIf{$closest\_from\_j\_i$ fits in route i}
 				\State $\var{improvements} \gets move\_if\_improvement(\var{routes[j]}, \var{routes[i]},$\\\hspace{2.5cm}$ \var{closest\_from\_i\_j}, \var{closest\_from\_j\_i}$)
-			\ElsIf{\textbf{not} $ is\_capacity\_reached\_when\_swap(\var{routes[i]}, \var{routes[j]}, \var{closest\_from\_j\_i})$}
-
+			\ElsIf{capacity is not reached by swapping customers}
 				\State $\var{improvements} \gets swap\_if\_improvement(\var{routes[i]}, \var{routes[j]},$\\\hspace{2.5cm}$ \var{closest\_from\_j\_i}, \var{closest\_from\_i\_j}$)
 			\EndIf
 
 			\If{$\var{improvements}$}
-			
-				\State $\var{route\_convexes[i]} \gets convex\_hull(\var{routes[i]})$
-				\State $\var{route\_convexes[j]} \gets convex\_hull(\var{routes[j]})$
-				
+				\State recalculate convex hull of route i and j				
 			\EndIf
-		\EndFor
+			\EndIf
+			\EndFor
 
 		\If{\textbf{not} $\var{improvements}$}
 			\State $\var{routes} = elim\_empty\_routes(\var{routes})$
@@ -358,6 +346,18 @@ Moving point E which is the closest point in route \(j\)to \(i\) is resulted in 
 
 	\end{algorithmic}
 \end{algorithm}
+
+\section{Process Analysis}
+Alexander Lerche Falk
+\begin{itemize}
+	\item Develop Nearest Neighbour Approach Heuristric \item Develop Custom Local Search Algorithms 1
+	\item Performance analysis of Heuristics and Localsearchs
+\end{itemize}
+Narongrit Unwerawattana
+\begin{itemize}
+	\item Develop Clustering Approach Heuristic
+	\item Develop Custom Local Search Algorithms 2
+\end{itemize}
 
 \newpage
 \bibliographystyle{plain}
