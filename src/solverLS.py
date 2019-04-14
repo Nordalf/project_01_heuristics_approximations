@@ -30,9 +30,6 @@ class SolverLS:
     # Husk at beregne til det næste punkt, som der bliver byttet ud med
     def close_index_route_swap(self):
         "self.solution = 2D-array solution/routes"
-        # t0 = time.clock()
-        counter = 0
-        exit_criteria = True
         self.calculate_routes_capacities()
         # print("SOLUTION: ", self.calculated_route_capacity)
         for i in range(len(self.solution.routes)-1):

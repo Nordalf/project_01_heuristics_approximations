@@ -33,6 +33,13 @@
 \lhead{\thetitle}
 \cfoot{\thepage}
 
+\makeatletter
+\let\OldStatex\Statex
+\renewcommand{\Statex}[1][3]{%
+  \setlength\@tempdima{\algorithmicindent}%
+  \OldStatex\hskip\dimexpr#1\@tempdima\relax}
+\makeatother
+
 \begin{document}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -93,7 +100,7 @@ Lastly, we are going to compare our own ideas against more common used algorithm
 
 \newpage
 
-\section{Custom Heuristics Algorithms}
+\section{Custom Heuristics Algorithms} 
 
 
 The first algorithm, which we have created, takes the approach of the Nearest Neighbour idea. Given an instance of CVRP, the starting point \- the depot where the vehicles are being loaded with customer requests \- is the point, where all calculations start. 
@@ -195,7 +202,16 @@ with every other route; take one route, compare it with every other route.
 	\end{algorithmic}
 \end{algorithm}
 
-\section{Custom Local Search Algorithms 2}
+\section{Custom Local Search Algorithms}
+While having created the heuristics, which provides us with solutions to the initial problem instances, we can still optimize. This is where the Local Search Optimization algorithms comes into play. 
+Given a canonical solution, we want to optimize it to reduce the total cost of the solution. We have provided three custom Local Search (LS) algorithms, trying to optimize the canonical solution. 
+\newline
+The first LS algorithm looks into the generated routes done by the heuristics. It takes two routes and compare them with each other, checking whether any swaps are possible in the two routes. 
+A swap is possible if the distance is being reduced in at least one route, while still preserving the maximum capacity limit of both routes. 
+The second LS algorithm looks like the first but with a minor change. It takes one route and compares it with every other route to find a better solution. It then continues doing this 
+with every other route; take one route, compare it with every other route. 
+
+\section{Custom Local Search Algorithms 2} \label{ls2}
 This localsearch algorithm for CVRP is inspired from the fact that if we wanted to find a customer point to move from one route to another, such point has to be the point that form convex hull of the route. We develop an algorithm from this fact to reduce number of comparison points of iteration each route by compute convex hull points of each route and only use those point as the candidate of interchanging points in routes. We also gain the addition benefit from haveing such list to estimate central of the route by computing average of convex hull point. We use the central point as the reference point of a route to find the closest point in others. These points are visulized in the figure, where lines are convex hull of a route. Point \(A\) and \(B\) are the closest points to central point from route \(i\) to route \(j\) (\(mid\_j\)) and from route \(j\) to \(i\) (\(mid\_i\)) respectively.
 
 \begin{figure}[H]
@@ -220,7 +236,7 @@ We implemented an algorithm according to \cite{Berg97} which has runtime complex
 When we performing moving case (1 and 2) we should also take account of the tour order. As showing in figure \ref{fig:local_case1}
 \newline
 
-\begin{figure}[!tbp]
+\begin{figure}[!ht]
 	\centering
 	\subfloat[Move Case]{\includegraphics[width=0.4\textwidth]{movepointtoroute.png}\label{fig:local_case1}}
 	\hfill
@@ -229,63 +245,84 @@ When we performing moving case (1 and 2) we should also take account of the tour
 
 Moving point E which is the closest point in route \(j\)to \(i\) is resulted in different tour between visiting E before \(B\)or after. Thus, it is necessary to compare cost between these two sub cases before perform moving operation as showing in Line 9 of Algorithm 5. The complexity in main for all loop is $O(n^2)$ and all operation inside the loop has complexity at most $O(n)$ if we have the improvement of route, we recompute the convex\_hull of 2 routes, thus, the complexity of each iteration of this localsearch is at most $O(n^3logn)$
 
+\section{Performance Analysis \& Boxplots}
+It has been a challenge to come up with our own custom solutions and the results we got from our algorithms and experiments
+were good. Our algorithms were built without being biased towards other existing algorithms. We tried to use our own imagination on how the problem could be solved. 
+We have been inspired by concepts but not algorithms directly, and it has made us more aware on how to tackle problems and how not to.
+\newline
+We have tried to create boxplots for our custom algorithms to give an indication whether or not the algorithms performs somewhat similar on the same instance, but with 
+a bigger dataset. Meaning: it is not completely random, even though the instance looks the same but has more data. If you look at the boxplot of our custom "close-index" local search algorithm \- \ref{fig:custom_close_idx_localsearch_boxplot_fig_cluster} \- applied on the heuristic cluster algorithm
+and compare it to the two\-opt local search algorithm \- \ref{fig:two_opt_cluster} \- applied on the same heuristic, then you are able to see the two\-opt does better \- especially on the golden instances \- but on the other instances, we are getting there. All the boxplots can be found in the appendices.
+\newline
+
+
+
+\section{Process Analysis}
+The group work went well. We were both enthusiastic about the work and wanted to try out as much as possible. 
+The communication between us has been nice and we have been splitting out the work in somewhat equal pieces to adapt to the workload from other courses.
+
+Alexander Lerche Falk
+\begin{itemize}
+	\item Develop Nearest Neighbour Approach Heuristric \item Develop Custom Local Search Algorithms 1
+	\item Performance analysis of Heuristics and Localsearchs
+\end{itemize}
+Narongrit Unwerawattana
+\begin{itemize}
+	\item Develop Clustering Approach Heuristic
+	\item Develop Custom Local Search Algorithms 2
+\end{itemize}
+both
+\begin{itemize}
+	\item Writing report
+\end{itemize}
+
+
 \newpage
 \bibliographystyle{plain}
 \bibliography{references}
 
-
 \newpage
-\appendix
+\begin{appendices}
+
 \section{\\Custom Cluster Algorithm to solve CVRP}
 % the \\ insures the section title is centered below the phrase: AppendixA
 
 \begin{algorithm}[!ht]
 	\caption{Cluster CVRP Localsearch}
 	\begin{algorithmic}[1]
-	\Require{ returns points such that it makes convex hull } 
-	\Require{ returns point in points which hase minimum distance from A} 
-	\Require{ returns True if capacity of given route is satisfy after add point A}
-	\Require{ returns True if capacity of given routes is satisfy swap  point A of route1 with point B of route2}
-	\Require{ returns list of routes where there empty route(contain only depot point) is removed}
-	\Ensure{ A Better solution to the CVRP instance}
+	\Require{$closest\_point(A, points)$: returns point in points which hase minimum distance from A} 
+	\Require{$elim\_empty\_routes$: returns list of routes where the empty routes are removed}
+	\Ensure{$routes$: Better Solution to the CVRP instance}
 	\Function{algorithm}{{$routes$, $maxcap$}}
 	\State $\var{route\_convexes}$ is an array storing convex\_hull for each route  
-	\For{$i < \text{length of routes}$}
-		\State $\var{route\_convexes}[i] \gets convex\_hull(\var{routes[i]}$)
-	\EndFor
 	\State $\var{improvements} \gets \text{True}$
 	\While{\texttt{$\var{improvements}$}}
 		\ForAll{$i$, $j$ such that $i$, $j$ are routes index combination}
-			\State $\var{central\_point\_i} \gets \text{sum(route\_convexes[i])/len(route\_convexes[i])}$
+			\State $\var{central\_point\_i} \gets$ average of point in convex i
 
-			\State $\var{central\_point\_j} \gets \text{sum(route\_convexes[j])/len(route\_convexes[j])}$
+			\State $\var{central\_point\_j} \gets$ average of point in convex j
 			
 			\State $\var{closest\_from\_i\_j} \gets \text{closest\_point(mid\_point\_i, convex\_routes[j])}$
 
 			\State $\var{closest\_from\_j\_i} \gets \text{closest\_point(mid\_point\_j, convex\_routes[i])}$
 
-			\If{$\var{closest\_from\_i\_j}$ is None or $\var{closest\_from\_j\_i}$ is None}
-				continue
-			\EndIf
-
+			\If{$\var{closest\_from\_i\_j}$ and $\var{closest\_from\_j\_i}$ is Found}
 			
-			\If{\text{capacity not reached after move}}
-				\State \text{add and store improvements}
-				\State \text{make the move}
-			\ElsIf{\textbf{not} $is\_capacity\_reached\_when\_move(\var{routes[i]}, \var{closest\_from\_j\_i})$}
-				\State $\var{improvements} \gets move\_if\_improvement(\var{routes[j]}, \var{routes[i]},$\\\hspace{2.5cm}$ \var{closest\_from\_i\_j}, \var{closest\_from\_j\_i}$)
-			\ElsIf{\textbf{not} $ is\_capacity\_reached\_when\_swap(\var{routes[i]}, \var{routes[j]}, \var{closest\_from\_j\_i})$}
-
-				\State $\var{improvements} \gets swap\_if\_improvement(\var{routes[i]}, \var{routes[j]},$\\\hspace{2.5cm}$ \var{closest\_from\_j\_i}, \var{closest\_from\_i\_j}$)
+			\If{$closest\_from\_i\_j$ fits in route j}
+				\State \text{add move to route improvements j}
+				\State \text{make the swap}
+			\ElsIf{$closest\_from\_j\_i$ fits in route i}
+				\State \text{add move to route improvements i}
+				\State \text{make the swap}
+			\ElsIf{capacity is not reached by swapping customers}
+				\State \text{swap the route-points between i and j}
 			\EndIf
 
 			\If{$\var{improvements}$}
-			
-				\State $\var{route\_convexes[i]} \gets convex\_hull(\var{routes[i]})$
-				\State $\var{route\_convexes[j]} \gets convex\_hull(\var{routes[j]})$
-				
+				\State recalculate convex hull of route i and j				
 			\EndIf
-		\EndFor
+			\EndIf
+			\EndFor
 
 		\If{\textbf{not} $\var{improvements}$}
 			\State $\var{routes} = elim\_empty\_routes(\var{routes})$
@@ -297,7 +334,7 @@ Moving point E which is the closest point in route \(j\)to \(i\) is resulted in 
 	\end{algorithmic}
 \end{algorithm}
 
-\section{\\Custom LocalSearch - Swap if any improvement}
+\section{\\LocalSearch Algorithm - Swap if any improvement}
 
 \begin{algorithm}[!ht]
 	\caption{swap\_if\_improvement}
@@ -305,9 +342,10 @@ Moving point E which is the closest point in route \(j\)to \(i\) is resulted in 
 		\Require{$dist(A,B)$ returns distance from point A to B}
 	\Function{swap\_if\_improvement}{{$route\_i, route\_j, j\_to\_i, i\_to\_j$}}
 
-	\State $\var{A}, \var{B}, \var{C} \gets \var{route\_i[i\_to\_j -1]}, \var{route\_i[i\_to\_j]}, \var{route\_i[i\_to\_j+1 \% len(route\_i)]}$
-
-	\State $\var{D}, \var{E}, \var{F} \gets \var{route\_j[j\_to\_i -1]}, \var{route\_j[j\_to\_i]}, \var{route\_j[j\_to\_i+1 \% len(route\_j)]}$
+	\State $\var{A}, \var{B}, \var{C} \gets \var{route\_i[i\_to\_j-1]}, \var{route\_i[i\_to\_j]},$
+	\Statex $\var{route\_i[i\_to\_j+1 mod(\%) len(route\_i)]}$
+	\State $\var{D}, \var{E}, \var{F} \gets \var{route\_j[j\_to\_i-1]}, \var{route\_j[j\_to\_i]},$ 
+	\Statex $\var{route\_j[j\_to\_i+1 mod(\%) len(route\_j)]}$
 
 	\State $\var{old\_distance\_i} \gets dist(\var{A},\var{B}) + dist(\var{B},\var{C})$
 	\State $\var{old\_distance\_j} \gets dist(\var{D},\var{E}) + dist(\var{E},\var{F})$
@@ -315,25 +353,30 @@ Moving point E which is the closest point in route \(j\)to \(i\) is resulted in 
 	\State $\var{new\_distance\_i} \gets dist(\var{A},\var{E}) + dist(\var{E},\var{C})$
 	\State $\var{new\_distance\_j} \gets dist(\var{D},\var{B}) + dist(\var{B},\var{F})$
 
-	\If{$\var{old\_distance\_i} + \var{old\_distance\_j} > \var{new\_distance\_i} + \var{new\_distance\_j}$}
-		swap point B of route i with point E of route j
-		\Return True
+	\If{$\var{old\_distance\_i} + \var{old\_distance\_j} >$ 
+		\Statex $\var{new\_distance\_i} + \var{new\_distance\_j}$}
+		\Statex $\text{swap point B of route i with point E of route j}$
+		\Statex \Return True
 	\EndIf
 	\EndFunction
 
 	\end{algorithmic}
 \end{algorithm}
 
-\section{\\Title of Appendix A}
-\begin{algorithm}[ht!]
+\newpage
+\section{\\LocalSearch Algorithm - Move if any improvement}
+
+\begin{algorithm}[!ht]
 	\caption{move\_if\_improvement}
 	\begin{algorithmic}[1]
 		\Require{$dist(A,B)$ returns distance from point A to B}
 	\Function{move\_if\_improvement}{{$route\_i, route\_j, i\_to\_j, j\_to\_i$}}
 
-	\State $\var{A}, \var{B}, \var{C} \gets \var{route\_i[i\_to\_j -1]}, \var{route\_i[i\_to\_j]}, \var{route\_i[i\_to\_j+1 \% len(route\_i)]}$
+	\State $\var{A}, \var{B}, \var{C} \gets \var{route\_i[i\_to\_j -1]}, \var{route\_i[i\_to\_j]},$
+	\Statex $\var{route\_i[i\_to\_j+1 \% len(route\_i)]}$
 
-	\State $\var{D}, \var{E}, \var{F} \gets \var{route\_j[j\_to\_i -1]}, \var{route\_j[j\_to\_i]}, \var{route\_j[j\_to\_i+1 \% len(route\_j)]}$
+	\State $\var{D}, \var{E}, \var{F} \gets \var{route\_j[j\_to\_i -1]}, \var{route\_j[j\_to\_i]},$ 
+	\Statex $\var{route\_j[j\_to\_i+1 \% len(route\_j)]}$
 
 
 	\State $\var{old\_distance\_i} \gets dist(\var{A},\var{B}) + dist(\var{B},\var{C})$
@@ -347,13 +390,15 @@ Moving point E which is the closest point in route \(j\)to \(i\) is resulted in 
 
 	\If{$\var{new\_dist\_before\_B} < {new\_dist\_after\_B}$}
 
-		\If{$\var{old\_distance\_i} + \var{old\_distance\_j} > \var{new\_dist\_before\_B} + \var{new\_distance\_j}$}
-			move point E from route j to route i before B
+		\If{$\var{old\_distance\_i} + \var{old\_distance\_j} >$ 
+			\Statex $\var{new\_dist\_before\_B} + \var{new\_distance\_j}$}
+			\Statex $\text{move point E from route j to route i before B}$
 		\EndIf
 	\Else
 
-		\If{$\var{old\_distance\_i} + \var{old\_distance\_j} > \var{new\_dist\_after\_B} + \var{new\_distance\_j}$}
-			move point E from route j to route i after B
+		\If{$\var{old\_distance\_i} + \var{old\_distance\_j} >$ 
+			\Statex $\var{new\_dist\_after\_B} + \var{new\_distance\_j}$}
+			\Statex $\text{move point E from route j to route i after B}$
 
 		\EndIf
 	\EndIf
@@ -361,4 +406,48 @@ Moving point E which is the closest point in route \(j\)to \(i\) is resulted in 
 
 	\end{algorithmic}
 \end{algorithm}
+
+\section{\\ BOXPLOT FIGURES}
+
+\begin{figure}
+	\centering
+	\subfloat[Heuristic NN Algorithm - Custom]{\includegraphics[width=0.7\textwidth]{solverNN_algorithm_boxplot.png}\label{fig:NN_heuristic_fig}}
+\end{figure}
+
+\begin{figure}[!htb]
+	\centering
+	\subfloat[Heuristic Cluster Algorithm - Custom]{\includegraphics[width=0.7\textwidth]{solverCHH_algorithm_boxplot.png}\label{fig:Cluster_heuristic_fig}}
+\end{figure}
+
+\begin{figure}[!htb]
+	\centering
+	\subfloat[Local Search Algorithm - Custom - Close index route for NN heustic]{\includegraphics[width=0.7\textwidth]{SolverLS_close_index_route_swap_solverNN_algorithm_boxplot.png}\label{fig:custom_close_idx_localsearch_boxplot_fig_nn}}
+\end{figure}
+\begin{figure}[!htb]
+	\centering
+	\subfloat[Close Index Custom Local Search Figure for cluster heuristic]{\includegraphics[width=0.7\textwidth]{SolverLS_close_index_route_swap_solverCHH_algorithm_boxplot.png}\label{fig:custom_close_idx_localsearch_boxplot_fig_cluster}}
+\end{figure}
+
+\begin{figure}[!htb]
+	\centering
+	\subfloat[Local Search Algorithm - Custom - All index combinations route for NN heuristic]{\includegraphics[width=0.7\textwidth]{SolverLS_all_combination_route_swap_solverNN_algorithm_boxplot.png}\label{fig:all_combinations_localsearch_boxplot_fig_nn}}
+\end{figure}
+\begin{figure}[!htb]
+	\centering
+	\subfloat[Local Search Algorithm - Custom - All index combinations route for cluster heuristic]{\includegraphics[width=0.7\textwidth]{SolverLS_all_combination_route_swap_solverCHH_algorithm_boxplot.png}\label{fig:all_combinations_localsearch_boxplot_fig_cluster}}
+\end{figure}
+
+%\section{\\Local Search Algorithm - Custom - Convex Compare}
+
+
+\begin{figure}[!htb]
+	\centering
+	\subfloat[Local Search Algorithm - Known - Two Opt for NN heuristic]{\includegraphics[width=0.7\textwidth]{TwoOPT_solverNN_algorithm_boxplot.png}\label{fig:two_opt_nn}}
+\end{figure}
+\begin{figure}[!htb]
+	\centering
+	\subfloat[Two Opt Known Local Search Figure for cluster heuristic]{\includegraphics[width=0.7\textwidth]{TwoOPT_solverNN_algorithm_boxplot.png}\label{fig:two_opt_cluster}}
+\end{figure}
+
+\end{appendices}
 \end{document}
