@@ -154,43 +154,38 @@ The complexity of this algorithm is $O(n^2)$ since the main while loop terminate
 \begin{algorithm}[hbt!]
 	\caption{Custom CVRP Heuristic - Clustering Approach}
 	\begin{algorithmic}[1]
-	\Require{$customers$: List of customer Points} 
+	\Require{$customers$: List of customer coordinate with it's capacity} 
 	\Require{$depot$: Depot Point} 
 	\Require{$maxcap$: Maximum capacity for each route} 
 	\Ensure{$routes$: Solution to the CVRP instance}
-	\Function{algorithm}{{$Points$, $depot$, $maxcap$}}
-	\State $\var{excludelist} \gets \textit{empty array containing visited nodes}$
+
 	\State $\var{routes} \gets \textit{empty array containing solution routes}$
-	\While{\texttt{$len(excludelist) < len(customers)$}}
+	\While{there is customer points not in solution}
 		
 	\State $\var{capacity} \gets \text{0}$
 	\State $\var{route} \gets \text{[depot]}$
 	
-	\State $\var{startpoint} \gets furthestpoint(depot, excludelist)$
-	\State $\var{excludelist}.append(startpoint)$
-	\State $\var{route}.append(startpoint)$
-	\State $\var{capacity} \gets \var{capacity} + \var{startpoint.capacity}$
-		\While{\texttt{$excludelist.length \le customers.length$}}
+	\State $\var{startpoint} \gets$ furthest customer point from $\var{depot}$ which is not in solution
+	\State add startpoint to route
 
-			\State $\var{closest} \gets closestpoint(startpoint, excludelist)$
+	\State $\var{capacity} \gets \var{capacity} + \var{startpoint.capacity}$
+		\While{$\var{capacity} < \var{maxcap} $}
+
+			\State $\var{closest} \gets$ closest customer point from $\var{startpoint}$ which is not in solution
 
 			\State $\var{c} \gets closest.capacity$
 
-			\If{$\var{c} + \var{capacity} > \var{max capacity}$}
+			\If{$\var{c} + \var{capacity} > \var{maxcap}$}
 				\text{break}
 			\EndIf
 
 			\State $\var{capacity} \gets \var{capacity} + \var{c}$
 			\State add closest to route
-			\State add closest to excludelist
-
 		\EndWhile
-		\State add route to result set routes
-
+		\State add route to routes
 	\EndWhile
 
 	\State \textbf{return} $routes$
-	\EndFunction
 	\end{algorithmic}
 \end{algorithm}
 
@@ -215,7 +210,7 @@ This localsearch algorithm for CVRP is inspired from the fact that if we wanted 
 \end{figure}
 
 
-We implemented an algorithm according to \cite{Berg97} which has runtime complexity of $O(nlogn)$. The iteration of our localsearch is given by pair of routes namely \(i\) and \(j\), we find the closest point from route \(i\) to \(j\) by comparing central point of convex \(i\) to central point of convex \(j\)and closest point from \(j\) to \(i\) respectively The possibilities of interchanging point from route \(i\) to \(j\) are following 3 cases
+We implemented an algorithm according to \cite{Berg97} which has runtime complexity of $O(nlogn)$. The iteration of our localsearch is given by pair of routes namely \(i\) and \(j\), we find the closest point from route \(i\) to \(j\) by comparing central point of convex \(i\) to central point of convex \(j\) and closest point from \(j\) to \(i\) respectively The possibilities of interchanging point from route \(i\) to \(j\) are following 3 cases
 \begin{enumerate}
 
 	\item If the capacity constain from moving \(i\) to \(j\) is not exceeded. We compare if moving closest customer point of \(i\) to \(j\) produces better route, if so, we proceed moving point from \(i\) to j
@@ -230,8 +225,6 @@ When we performing moving case (1 and 2) we should also take account of the tour
 \begin{figure}[!tbp]
 	\centering
 	\subfloat[Move Case]{\includegraphics[width=0.4\textwidth]{movepointtoroute.png}\label{fig:local_case1}}
-	\hfill
-
 	\subfloat[Swap Case]{\includegraphics[width=0.4\textwidth]{swapcase.png}\label{fig:local_case2}}
 
 \end{figure}
