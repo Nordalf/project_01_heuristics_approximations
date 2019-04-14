@@ -91,9 +91,9 @@
 
 \section{Introduction}
 
-This project shows heuristics algorithms, which can resolve the Capacitated Vehicle Routing Problem (CVRP). If the heuristic can resolve the problem, we are going to apply Local Search algorithms to improve the results from the heuristics. 
-The CVRP gives insight into how to deliver orders to customers using the shortest route for each vehicle, while preserving the capacity limit of each vehicle.\\newline
-We have created two heuristic algorithms: one using a nearest-neighbour terminology and the other one taking inspiration of clustering close customers. We also show two self-implemented Local Search algorithms. 
+This project shows custom heuristic algorithms, resolving the Capacitated Vehicle Routing Problem (CVRP). When the heuristics have resolved the problem, given a canonical solution, we are applying custom \- and known \- Local Search algorithms to improve the results from the heuristics. 
+The CVRP gives insight into how to deliver orders to customers using the shortest route for each vehicle, while preserving the capacity limit of each vehicle.\\
+We have created two heuristic algorithms: one using a nearest-neighbour terminology and the other one taking inspiration of clustering close customers. We also show three custom developed Local Search algorithms. 
 Lastly, we are going to compare our own ideas against more common used algorithms, which are tested and proved to work. 
 
 \hspace{1 cm}--- Alexander \& Narongrit
@@ -103,11 +103,12 @@ Lastly, we are going to compare our own ideas against more common used algorithm
 \section{Custom Heuristics Algorithms} 
 
 
-The first algorithm, which we have created, takes the approach of the Nearest Neighbour idea. Given an instance of CVRP, the starting point \- the depot where the vehicles are being loaded with customer requests \- is the point, where all calculations start. 
-We start by checking the nearest point from the depot and add it to the first route. We then add the shortest path from the newly added point to the route and continue until we are out of capacity. Each point (customer) has a capacity, which adds up until the max is reached. We continue during the same from adding the first shortest route from the depot until we have reached our capacity limit. At one point, we have x amounts of routes, covering the problem instance. 
+The first algorithm, which we have created, takes the approach of the Nearest Neighbour idea. Given an instance of CVRP, the starting point - the depot where the vehicles are being loaded with customer requests - is the point, where all calculations begins. 
+We start by checking the nearest point from the depot and add it to the first route. We then add next nearest point from the point recently added, and add it to the route. We continue until we are out of capacity, which is determined by each instance. We continue adding the nearest neighbour between the points until we have reached our capacity limit. At one point, we have covered all points, covering the problem instance, and giving us one or more routes for one or more vehicles.
+The algorithm is described in pseudocode:
 \newline
 
-\begin{algorithm}
+\begin{algorithm}[!ht]
 	\caption{Custom CVRP Heuristic - Nearest Neighbour Approach}\label{euclid}
 	\begin{algorithmic}[1]
 	\Require{$Point_{1} \dots Point_{N}$} 
@@ -147,72 +148,65 @@ We start by checking the nearest point from the depot and add it to the first ro
 The first suggestion for an algorithm has a time complexity of $O(n^2)$. The algorithm has to iterate through the points of the instance twice. 
 Given a point in the solution space, we are trying to find the shortest distance to any point from the current point. When we have found it, we are marking the point,
 and making it the new current point. Then we continue to find the shortest distance to any non-visited point, while preserving the maximum capacity of the vehicle. 
-If we find any shortest distance point from a current point, but it is going to break the maximum capacity limit, then we are returning to the depot, and start a new route.
+At some point, we are out of space in the vehicle, leaving us no choice but to return to the depot. From here we start a new route until all points are visited.
 \newline
 Our next algorithm is inspired by Cluster Analysis \cite{website:cluster-analysis}, which is popular in machine learning and data mining. 
 The idea is to group a set of points lying close to each other in an euclidean space. 
-By choosing such approach to attack the Vehicle Routing Problem, we can ensure points are lying close to each other before we are deriving a route.
+By choosing such approach to attack the CVRP, we can ensure points are lying close to each other before we are deriving a route.
 \newline
 The heuristic algorithm has the following behaviour: (1) Pick a customer point furthest from away from the depot, which is not in the solution route;
 (2) Repeatly find nearest customer point from (1), which is not in any solution route and group such point together until the capacity is reached and save the points as a cluster; (3) Repeat (1) and (2) until we cover all customer points
 
-The complexity of this algorithm is $O(n^2)$ since the main while loop terminates after we covered all customer points in given instance and for each iteration of while, we assume that we have auxiliary data structure stored distance between one point to another it can be perfrom in $O(n)$ time.
-
-
-\section{Custom Local Search Algorithms}
-While having created the heuristics, which provides us with solutions to the initial problem instances, we can still optimize. This is where the Local Search Optimization algorithms comes into play. 
-Given a canonical solution, we want to optimize it to reduce the total cost of the solution. We have provided three custom Local Search (LS) algorithms, trying to optimize the canonical solution. 
-\newline
-The first LS algorithm looks into the generated routes done by the heuristics. It takes two routes and compare them with each other, checking whether any swaps are possible in the two routes. 
-A swap is possible if the distance is being reduced in at least one route, while still preserving the maximum capacity limit of both routes. 
-The second LS algorithm looks like the first but with a minor change. It takes one route and compares it with every other route to find a better solution. It then continues doing this 
-with every other route; take one route, compare it with every other route. 
+The complexity of this algorithm is $O(n^2)$ since the main while loop terminates after we covered all customer points in a given instance. For each iteration in the while loop, we have an auxiliary data structure - based on KD-Tree - , storing the distance between two points. This structure can perform in $O(n)$.
 
 \begin{algorithm}[!ht]
 	\caption{Custom CVRP Heuristic - Clustering Approach}
 	\begin{algorithmic}[1]
-	\Require{$customers$: List of customer Points} 
+	\Require{$customers$: List of customer coordinate with it's capacity} 
 	\Require{$depot$: Depot Point} 
 	\Require{$maxcap$: Maximum capacity for each route} 
 	\Ensure{$routes$: Solution to the CVRP instance}
-	\Function{algorithm}{{$Points$, $depot$, $maxcap$}}
-	\State $\var{excludelist} \gets \textit{empty array containing visited nodes}$
+
 	\State $\var{routes} \gets \textit{empty array containing solution routes}$
-	\While{\texttt{$len(excludelist) < len(customers)$}}
+	\While{there is customer points not in solution}
+		
 	\State $\var{capacity} \gets \text{0}$
 	\State $\var{route} \gets \text{[depot]}$
-	\State $\var{startpoint} \gets furthestpoint(depot, excludelist)$
-	\State $\var{excludelist} \gets \textit{append the startpoint}$
-	\State $\var{route} \gets \textit{append the startpoint}$
+	
+	\State $\var{startpoint} \gets$ furthest customer point from $\var{depot}$ which is not in solution
+	\State add startpoint to route
+
 	\State $\var{capacity} \gets \var{capacity} + \var{startpoint.capacity}$
-		\While{\texttt{$excludelist.length \le customers.length$}}
-			\State $\var{closest} \gets closestpoint(startpoint, excludelist)$
+		\While{$\var{capacity} < \var{maxcap} $}
+
+			\State $\var{closest} \gets$ closest point from $\var{startpoint}$ not in solution
+
 			\State $\var{c} \gets closest.capacity$
-			\If{$\var{c} + \var{capacity} > \var{max capacity}$}
+
+			\If{$\var{c} + \var{capacity} > \var{maxcap}$}
 				\text{break}
 			\EndIf
 			\State $\var{capacity} \gets \var{capacity} + \var{c}$
 			\State add closest to route
-			\State add closest to excludelist
 		\EndWhile
-		\State add route to result set routes
+		\State add route to routes
 	\EndWhile
 	\State \textbf{return} $routes$
-	\EndFunction
 	\end{algorithmic}
 \end{algorithm}
-
-\section{Custom Local Search Algorithms}
-While having created the heuristics, which provides us with solutions to the initial problem instances, we can still optimize. This is where the Local Search Optimization algorithms comes into play. 
+\newpage
+\section{First Custom Local Search Algorithms}
+Having executed the heuristics, providing us with solutions to the initial problem instances, we can continue optimizing. This is where the Local Search Optimization algorithms comes into play. 
 Given a canonical solution, we want to optimize it to reduce the total cost of the solution. We have provided three custom Local Search (LS) algorithms, trying to optimize the canonical solution. 
 \newline
-The first LS algorithm looks into the generated routes done by the heuristics. It takes two routes and compare them with each other, checking whether any swaps are possible in the two routes. 
+The first LS algorithm looks into the generated routes done by the heuristics. It takes two routes and compare them with each other, checking if any swaps are possible in the two routes. 
 A swap is possible if the distance is being reduced in at least one route, while still preserving the maximum capacity limit of both routes. 
 The second LS algorithm looks like the first but with a minor change. It takes one route and compares it with every other route to find a better solution. It then continues doing this 
-with every other route; take one route, compare it with every other route. 
+with every other route. 
 
-\section{Custom Local Search Algorithms 2} \label{ls2}
-This localsearch algorithm for CVRP is inspired from the fact that if we wanted to find a customer point to move from one route to another, such point has to be the point that form convex hull of the route. We develop an algorithm from this fact to reduce number of comparison points of iteration each route by compute convex hull points of each route and only use those point as the candidate of interchanging points in routes. We also gain the addition benefit from haveing such list to estimate central of the route by computing average of convex hull point. We use the central point as the reference point of a route to find the closest point in others. These points are visulized in the figure, where lines are convex hull of a route. Point \(A\) and \(B\) are the closest points to central point from route \(i\) to route \(j\) (\(mid\_j\)) and from route \(j\) to \(i\) (\(mid\_i\)) respectively.
+\section{Second Custom Local Search Algorithms} \label{ls2}
+This localsearch algorithm for CVRP is inspired from the fact that if we wanted to find a customer point to move from one route to another, such point has to be the point that form a convex hull of the route. We developed an algorithm to reduce the number of comparisons done by each iteration on each route by computing the convex hull points of each route, and only use those point as candidates for interchanging points in the routes. 
+We also gain the benefit from haveing such list to estimate a "central" of the route by computing the average of convex hull point. We use the central point as the reference point of a route to find the closest point in others. These points are visualized in the figure, where lines are convex hull of a route. Point \(A\) and \(B\) are the closest points to central point from route \(i\) to route \(j\) (\(mid\_j\)) and from route \(j\) to \(i\) (\(mid\_i\)) respectively.
 
 \begin{figure}[H]
 	\caption{Convex hull points and central points of two routes}
@@ -223,17 +217,18 @@ This localsearch algorithm for CVRP is inspired from the fact that if we wanted 
 \end{figure}
 
 
-We implemented an algorithm according to \cite{Berg97} which has runtime complexity of $O(nlogn)$. The iteration of our localsearch is given by pair of routes namely \(i\) and \(j\), we find the closest point from route \(i\) to \(j\) by comparing central point of convex \(i\) to central point of convex \(j\)and closest point from \(j\) to \(i\) respectively The possibilities of interchanging point from route \(i\) to \(j\) are following 3 cases
+We implemented an algorithm defined by Mark de Berg \cite{Berg97} which has a runtime complexity of $O(nlogn)$. Our local search is given by a pair of routes: namely \(i\) and \(j\). We find the closest point from route \(i\) to \(j\) by comparing the central points in the convex \(i\) to the central point of the convex \(j\) and closest point from \(j\) to \(i\) respectively. 
+The possibilities of interchanging point from route \(i\) to \(j\) are defined in the following three cases:
 \begin{enumerate}
 
-	\item If the capacity constain from moving \(i\) to \(j\) is not exceeded. We compare if moving closest customer point of \(i\) to \(j\) produces better route, if so, we proceed moving point from \(i\) to j
+	\item If the capacity constraint from moving \(i\) to \(j\) does not exceed its maximum, we compare if moving the closest customer point from \(i\) to \(j\) generates a better route. If so, we proceed and move the point from \(i\) to \(j\)
 
-	\item If the capacity constain from moving \(j\) to \(i\) is not exceeded. We compare if moving closest customer point of \(j\)to \(i\) produces better route, if so, we proceed moving point from \(j\)to i
+	\item If the capacity constraint from moving \(j\) to \(i\) does not exceed its maximum, we compare if moving the closest customer point from \(j\) to \(i\) generates a better route. If so, we proceed and move the point from \(j\) to \(i\)
 
-	\item if the capacity constain from switching closest customer point of \(i\) to \(j\)is not exceeded. We compare if switching points of two routes produces better route, if so, we switch the candidate point from route \(i\) to route \(j\) and \(j\) to \(i\) respectively.
+	\item if the capacity constraint from swapping the closest customer point of \(i\) to \(j\) does not exceed, we compare if swapping the points of the two routes generates a better route. If so, we swap the candidate point from route \(i\) to route \(j\) and \(j\) to \(i\) respectively.
 \end{enumerate}
 
-When we performing moving case (1 and 2) we should also take account of the tour order. As showing in figure \ref{fig:local_case1}
+When we are performing  the moving cases (1 and 2), we should also take into account the tour order. This is shown in figure \ref{fig:local_case1}
 \newline
 
 \begin{figure}[!ht]
@@ -243,16 +238,20 @@ When we performing moving case (1 and 2) we should also take account of the tour
 	\subfloat[Swap Case]{\includegraphics[width=0.4\textwidth]{swapcase.png}\label{fig:local_case2}}
 \end{figure}
 
-Moving point E which is the closest point in route \(j\)to \(i\) is resulted in different tour between visiting E before \(B\)or after. Thus, it is necessary to compare cost between these two sub cases before perform moving operation as showing in Line 9 of Algorithm 5. The complexity in main for all loop is $O(n^2)$ and all operation inside the loop has complexity at most $O(n)$ if we have the improvement of route, we recompute the convex\_hull of 2 routes, thus, the complexity of each iteration of this localsearch is at most $O(n^3logn)$
+Moving point E - which is the closest point in route \(j\)to \(i\) - is resulted in a different tour between visiting E before \(B\) or after. Thus, it is necessary to compare cost between these two sub cases before performing the move operation as shown Appendix C, Line 9. The complexity is $O(n^2)$ and all operations inside the loop have the complexity of at most $O(n)$. If we have the improvement of route, we recompute the convex hull of 2 routes, thus, the complexity of each iteration of this localsearch is at most $O(n^3logn)$
 
 \section{Performance Analysis \& Boxplots}
-It has been a challenge to come up with our own custom solutions and the results we got from our algorithms and experiments
-were good. Our algorithms were built without being biased towards other existing algorithms. We tried to use our own imagination on how the problem could be solved. 
+It has been a challenge to come up with our own custom solutions. The results we got from our algorithms and experiments
+were good, but we do see struggles in our design. An example of this is shown in the NN algorithm, where the first couple of routes are good, but then the later have longer distances between the points, because they are "leftovers". 
+\newline
+Our algorithms were built without trying to be biased towards other existing algorithms. We tried to use our own imagination on how the problems could be solved. 
 We have been inspired by concepts but not algorithms directly, and it has made us more aware on how to tackle problems and how not to.
 \newline
 We have tried to create boxplots for our custom algorithms to give an indication whether or not the algorithms performs somewhat similar on the same instance, but with 
-a bigger dataset. Meaning: it is not completely random, even though the instance looks the same but has more data. If you look at the boxplot of our custom "close-index" local search algorithm \- \ref{fig:custom_close_idx_localsearch_boxplot_fig_cluster} \- applied on the heuristic cluster algorithm
-and compare it to the two\-opt local search algorithm \- \ref{fig:two_opt_cluster} \- applied on the same heuristic, then you are able to see the two\-opt does better \- especially on the golden instances \- but on the other instances, we are getting there. All the boxplots can be found in the appendices.
+a bigger dataset. Meaning: it is not completely random, even though the instance looks the same but has more data. If you look at the boxplot of our custom "close-index" local search algorithm - Figure \ref{fig:custom_close_idx_localsearch_boxplot_fig_cluster} - applied on the heuristic cluster algorithm
+and compare it to the two-opt local search algorithm - Figure \ref{fig:two_opt_cluster} - applied on the same heuristic, then you are able to see the two-opt does better - especially on the golden instances - but on the other instances, we are getting there. 
+\newline 
+\textit{All the boxplots can be found in the appendices.}
 \newline
 
 
@@ -411,42 +410,39 @@ both
 
 \begin{figure}
 	\centering
-	\subfloat[Heuristic NN Algorithm - Custom]{\includegraphics[width=0.7\textwidth]{solverNN_algorithm_boxplot.png}\label{fig:NN_heuristic_fig}}
+	\caption{Heuristic NN Algorithm - Custom}{\includegraphics[width=0.8\textwidth]{solverNN_algorithm_boxplot.png}\label{fig:NN_heuristic_fig}}
 \end{figure}
 
 \begin{figure}[!htb]
 	\centering
-	\subfloat[Heuristic Cluster Algorithm - Custom]{\includegraphics[width=0.7\textwidth]{solverCHH_algorithm_boxplot.png}\label{fig:Cluster_heuristic_fig}}
+	\caption{Heuristic Cluster Algorithm - Custom}{\includegraphics[width=0.8\textwidth]{solverCHH_algorithm_boxplot.png}\label{fig:Cluster_heuristic_fig}}
 \end{figure}
 
 \begin{figure}[!htb]
 	\centering
-	\subfloat[Local Search Algorithm - Custom - Close index route for NN heustic]{\includegraphics[width=0.7\textwidth]{SolverLS_close_index_route_swap_solverNN_algorithm_boxplot.png}\label{fig:custom_close_idx_localsearch_boxplot_fig_nn}}
+	\caption{Local Search Algorithm - Custom - Close index route for NN heustic}{\includegraphics[width=0.8\textwidth]{SolverLS_close_index_route_swap_solverNN_algorithm_boxplot.png}\label{fig:custom_close_idx_localsearch_boxplot_fig_nn}}
 \end{figure}
 \begin{figure}[!htb]
 	\centering
-	\subfloat[Close Index Custom Local Search Figure for cluster heuristic]{\includegraphics[width=0.7\textwidth]{SolverLS_close_index_route_swap_solverCHH_algorithm_boxplot.png}\label{fig:custom_close_idx_localsearch_boxplot_fig_cluster}}
+	\caption{Close Index Custom Local Search Figure for cluster heuristic}{\includegraphics[width=0.8\textwidth]{SolverLS_close_index_route_swap_solverCHH_algorithm_boxplot.png}\label{fig:custom_close_idx_localsearch_boxplot_fig_cluster}}
+\end{figure}
+
+\begin{figure}[!htb]
+	\centering
+	\caption{Local Search Algorithm - Custom - All index combinations route for NN heuristic}{\includegraphics[width=0.8\textwidth]{SolverLS_all_combination_route_swap_solverNN_algorithm_boxplot.png}\label{fig:all_combinations_localsearch_boxplot_fig_nn}}
+\end{figure}
+\begin{figure}[!htb]
+	\centering
+	\caption{Local Search Algorithm - Custom - All index combinations route for cluster heuristic}{\includegraphics[width=0.8\textwidth]{SolverLS_all_combination_route_swap_solverCHH_algorithm_boxplot.png}\label{fig:all_combinations_localsearch_boxplot_fig_cluster}}
 \end{figure}
 
 \begin{figure}[!htb]
 	\centering
-	\subfloat[Local Search Algorithm - Custom - All index combinations route for NN heuristic]{\includegraphics[width=0.7\textwidth]{SolverLS_all_combination_route_swap_solverNN_algorithm_boxplot.png}\label{fig:all_combinations_localsearch_boxplot_fig_nn}}
+	\caption{Local Search Algorithm - Known - Two Opt for NN heuristic}{\includegraphics[width=0.8\textwidth]{TwoOPT_solverNN_algorithm_boxplot.png}\label{fig:two_opt_nn}}
 \end{figure}
 \begin{figure}[!htb]
 	\centering
-	\subfloat[Local Search Algorithm - Custom - All index combinations route for cluster heuristic]{\includegraphics[width=0.7\textwidth]{SolverLS_all_combination_route_swap_solverCHH_algorithm_boxplot.png}\label{fig:all_combinations_localsearch_boxplot_fig_cluster}}
-\end{figure}
-
-%\section{\\Local Search Algorithm - Custom - Convex Compare}
-
-
-\begin{figure}[!htb]
-	\centering
-	\subfloat[Local Search Algorithm - Known - Two Opt for NN heuristic]{\includegraphics[width=0.7\textwidth]{TwoOPT_solverNN_algorithm_boxplot.png}\label{fig:two_opt_nn}}
-\end{figure}
-\begin{figure}[!htb]
-	\centering
-	\subfloat[Two Opt Known Local Search Figure for cluster heuristic]{\includegraphics[width=0.7\textwidth]{TwoOPT_solverNN_algorithm_boxplot.png}\label{fig:two_opt_cluster}}
+	\caption{Two Opt Known Local Search Figure for cluster heuristic}{\includegraphics[width=0.8\textwidth]{TwoOPT_solverNN_algorithm_boxplot.png}\label{fig:two_opt_cluster}}
 \end{figure}
 
 \end{appendices}
