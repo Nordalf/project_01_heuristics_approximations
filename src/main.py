@@ -14,6 +14,7 @@ import solution
 from solverLS import SolverLS
 import solverCHH
 import solverNN
+import metaFFD
 import utilities
 from error import TimeOutExeption
 
@@ -161,7 +162,8 @@ def main(argv):
     else:
         instance = data.Data(config.instance_file)
         # alg = solverNN.algorithm
-        alg = solverCHH.algorithm
+        # alg = solverCHH.algorithm
+        alg = metaFFD.algorithm
         sol = solve(instance, alg, config)
         if config.output_file is not None:
             if config.graphic_sol:
