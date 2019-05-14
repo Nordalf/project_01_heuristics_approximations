@@ -157,7 +157,7 @@ By choosing such approach to attack the CVRP, we can ensure points are lying clo
 The heuristic algorithm has the following behaviour: (1) Pick a customer point furthest from away from the depot, which is not in the solution route;
 (2) Repeatly find nearest customer point from (1), which is not in any solution route and group such point together until the capacity is reached and save the points as a cluster; (3) Repeat (1) and (2) until we cover all customer points
 
-The complexity of this algorithm is $O(n^2)$ since the main while loop terminates after we covered all customer points in a given instance. For each iteration in the while loop, we have an auxiliary data structure - based on KD-Tree - , storing the distance between two points. This structure can perform in $O(n)$.
+The complexity of this algorithm is $O(n^2)$ since the main while loop terminates after we covered all customer points in a given instance. Furthermore each iteration in the while loop is executed in $O(n)$. 
 
 \begin{algorithm}[!ht]
 	\caption{Custom CVRP Heuristic - Clustering Approach}
@@ -197,7 +197,8 @@ The complexity of this algorithm is $O(n^2)$ since the main while loop terminate
 \newpage
 \section{First Custom Local Search Algorithms}
 Having executed the heuristics, providing us with solutions to the initial problem instances, we can continue optimizing. This is where the Local Search Optimization algorithms comes into play. 
-Given a canonical solution, we want to optimize it to reduce the total cost of the solution. We have provided three custom Local Search (LS) algorithms, trying to optimize the canonical solution. 
+Given a canonical solution, we want to optimize it to reduce the total cost of the solution. We have provided three custom Local Search (LS) algorithms, trying to optimize the canonical solution.
+All of our localsearches optimize solution by make exchanges of visiting node between 2 routes in solution set. Thus they can be used in combination with original Traveling salesman problem's localsearches such as 2-opt and 3-opt, where improvements are done by swapping and reversing order of visiting nodes in single route.
 \newline
 The first LS algorithm looks into the generated routes done by the heuristics. It takes two routes and compare them with each other, checking if any swaps are possible in the two routes. 
 A swap is possible if the distance is being reduced in at least one route, while still preserving the maximum capacity limit of both routes. 
@@ -269,6 +270,7 @@ Narongrit Unwerawattana
 \begin{itemize}
 	\item Develop Clustering Approach Heuristic
 	\item Develop Custom Local Search Algorithms 2
+	\item Develop 2 and 3 opt localsearch
 \end{itemize}
 both
 \begin{itemize}

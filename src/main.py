@@ -24,9 +24,6 @@ from two_opt import TwoOPT
 from cluster_localsearch import ClusterOPT
 from local_search import LocalSearch
 
-import matplotlib
-import matplotlib.pyplot as plt
-import pandas as pd
 
 # Used for table creation
 instance_times_costs = []
@@ -48,32 +45,32 @@ def solve(instance, alg, config):
 
     chh_cost = sol.cost()
 
-    # ls_alg = ClusterOPT(sol).run
-    # ls = LocalSearch(solution=sol, alg=ls_alg)
-    # try:
-    #     sol = ls.construct(config.time_limit-t0)
-    # except TimeOutExeption as e:
-    #     print("timeout")
-    #     sol = e.solution
+    ls_alg = ClusterOPT(sol).run
+    ls = LocalSearch(solution=sol, alg=ls_alg)
+    try:
+        sol = ls.construct(config.time_limit-t0)
+    except TimeOutExeption as e:
+        print("timeout")
+        sol = e.solution
         
-    # cluster_opt_cost = sol.cost()
+    cluster_opt_cost = sol.cost()
 
-    # print("after clusterOPT", chh_cost - cluster_opt_cost)
-    # for i in range(len(sol.routes)):
-    #     print("[{}]".format(i), sol.routes[i])
+    print("after clusterOPT", chh_cost - cluster_opt_cost)
+    for i in range(len(sol.routes)):
+        print("[{}]".format(i), sol.routes[i])
 
     
-    # ls_alg = TwoOPT(sol).run
-    # ls = LocalSearch(solution=sol, alg=ls_alg)
-    # try:
-    #     sol = ls.construct(config.time_limit-t0)
-    # except TimeOutExeption as e:
-    #     print("timeout")
-    #     sol = e.solution
+    ls_alg = TwoOPT(sol).run
+    ls = LocalSearch(solution=sol, alg=ls_alg)
+    try:
+        sol = ls.construct(config.time_limit-t0)
+    except TimeOutExeption as e:
+        print("timeout")
+        sol = e.solution
 
-    # two_opt_cost = sol.cost()
+    two_opt_cost = sol.cost()
 
-    # print("after 2opt", cluster_opt_cost - two_opt_cost)
+    print("after 2opt", cluster_opt_cost - two_opt_cost)
 
     # for i in range(len(sol.routes)):
     #     print("[{}]".format(i), sol.routes[i])
@@ -104,6 +101,8 @@ def solve(instance, alg, config):
 
 
 def boxplotter(filename):
+    import pandas as pd
+
     dataframe = pd.read_csv(filename+'.dat', ' ', na_values='.')
     # color = {'boxes': 'DarkGreen', 'whiskers': 'DarkOrange', 'medians': 'DarkBlue', 'caps': 'Gray'}
     slicer = dataframe.iloc[:,[0,1,2]]
@@ -184,7 +183,7 @@ def main(argv):
     parser.add_argument('-g', dest="graphic_sol", action='store_true',
                         help='graphical solution')
 
-    parser.add_argument('-instance_file', action='store',
+    parser.add_argument('instance_file', action='store',
                         help='The path to the file of the instance to solve')
 
     parser.add_argument('-all', action='store',
@@ -212,6 +211,7 @@ def main(argv):
         sol = solve(instance, alg, config)
         if config.output_file is not None:
             if config.graphic_sol:
+                import matplotlib.pyplot as plt
                 plt.figure(figsize=(20, 10))
                 plt.rcParams.update({'font.size': 22})
                 sol.plot_routes(split=config.split_route,
