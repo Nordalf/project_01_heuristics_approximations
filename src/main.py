@@ -122,7 +122,7 @@ def performance_testing():
     h_alg = [solverNN.algorithm, solverCHH.algorithm]
     h_alg_name = ["solverNN.algorithm", "solverCHH.algorithm"]
     ls_alg_name = ["SolverLS_close_index_route_swap", "SolverLS_all_combination_route_swap",
-                            "TwoOPT"]
+                            "TwoOPT", "ClusterOPT"]
     try:
         for (idx, algo) in enumerate(h_alg):
             with open('../results/'+h_alg_name[idx]+'.dat', "a") as filehandle:
@@ -138,7 +138,7 @@ def performance_testing():
                             filehandle.write("{} {} {}".format(splitted_name[0], sol.cost(), round(t0,2)))
                             filehandle.write("\n")
                             ls_alg = [SolverLS(sol).run_first, SolverLS(sol).run_second,
-                                            TwoOPT(sol).run]
+                                            TwoOPT(sol).run, ClusterOPT(sol).run]
                                             
                             
                             for (ls_idx, l_alg) in enumerate(ls_alg):
