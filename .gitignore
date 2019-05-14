@@ -1,6 +1,7 @@
 *.png
 *.xml
 *.sol
+*.dat
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
