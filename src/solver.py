@@ -41,7 +41,7 @@ class MetaHeuristic:
     solution = None
     seed = 4
 
-    def __init__(self, instance=None, alg=None, seed=4):
+    def __init__(self, instance=None, alg=None, seed=None): # Seed set to None to use the current time
         assert instance is not None
         assert alg is not None
         self.instance = instance
