@@ -15,7 +15,7 @@ from solverLS import SolverLS
 import solverCHH
 import solverNN
 import metaFFD
-import ACO
+import ACO_test
 import utilities
 from error import TimeOutExeption
 
@@ -34,7 +34,7 @@ instance_times_costs = []
 def solve(instance, alg, config):
     global instance_times_costs
     temp_instance_times_costs = []
-    t0 = time.clock()
+    t0 = time.process_time()
     ch = MetaHeuristic(instance, alg)
     # returns an object of type Solution
     try:
@@ -164,7 +164,7 @@ def main(argv):
         instance = data.Data(config.instance_file)
         # alg = solverNN.algorithm
         # alg = solverCHH.algorithm
-        alg = ACO.algorithm
+        alg = ACO_test.Ant().algorithm
         sol = solve(instance, alg, config)
         if config.output_file is not None:
             if config.graphic_sol:

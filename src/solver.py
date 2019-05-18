@@ -3,7 +3,7 @@ import math
 from data import Data
 import solution
 import sys
-import signal
+# import signal
 from error import TimeOutExeption
 
 
@@ -24,8 +24,8 @@ class ConstructionHeuristics:
         raise TimeOutExeption(self.solution)
 
     def construct(self, time_left):
-        signal.signal(signal.SIGALRM, self.timeoutHandler)
-        signal.alarm(math.ceil(time_left))
+        # signal.signal(signal.SIGALRM, self.timeoutHandler) # Signal Not Available On Windows
+        # signal.alarm(math.ceil(time_left))
         return self.canonical_solution()
 
     def canonical_solution(self):
@@ -53,8 +53,8 @@ class MetaHeuristic:
         raise TimeOutExeption(self.solution)
 
     def construct(self, time_left):
-        signal.signal(signal.SIGALRM, self.timeoutHandler)
-        signal.alarm(math.ceil(time_left))
+        # signal.signal(signal.SIGALRM, self.timeoutHandler)
+        # signal.alarm(math.ceil(time_left))
         return self.canonical_solution()
 
     def canonical_solution(self):
