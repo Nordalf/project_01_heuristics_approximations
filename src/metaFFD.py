@@ -79,7 +79,7 @@ def is_accept(before_length, after_length, temp):
     return random.random() <= math.exp(-(after_length-before_length)/temp)
 
 
-def simulated_annealing(data, solution, distance, temp=1000, iteration=1000000, alpha=0.95):
+def simulated_annealing(data, solution, distance, temp=1000, iteration=10000, alpha=0.95):
 
     improving_routes = solution.routes.copy()
     best_cost_found = solution.cost()

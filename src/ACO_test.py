@@ -37,6 +37,7 @@ class Ant:
     """
         Ants build solutions probabilistically without updating pheromone trails
     """
+    local_best = 0
     visit_memory = [] # Memory of visited nodes
     class Trail:
         visited_trail = 0
@@ -48,61 +49,66 @@ class Ant:
         route = [0]
         Q = data.capacity # Max Capacity
         no_of_requests = len(data.nodes)
-        pheromone_level = 1.0 / no_of_requests # Default level. Set to low. The value goes to 1.0
+        pheromone_level = 1 / no_of_requests # Default level. Set to low. The value goes to 1.0
         q = 0 # Collected capacity
         distance = 0
-        heuristic_value = 0 # Default Value
         not_visited_nodes = {}
         
-
-        for i in range(len(data.nodes)):
-            not_visited_nodes[data.nodes[i]["id"]] = {
+        
+        for i in range(1, len(data.nodes)):
+            not_visited_nodes[data.nodes[i]["id"]-1] = {
                     "id": data.nodes[i]["id"],
                     "pt": data.nodes[i]["pt"],
                     "tp": data.nodes[i]["tp"],
                     "rq": data.nodes[i]["rq"],
                 }
             # Copy the problem instance to play with
+                
+        current_request = random.choice(list(not_visited_nodes)) # The first choice is random chosen
+        q += not_visited_nodes[current_request]["rq"] # Update the current capacity used for the route
+        route += [current_request] # Add it to the route
+
+        del not_visited_nodes[current_request] # Remove the randomly picked, since it has been "marked" as visited now
+        print("First Random Picked: ", current_request)
         
-        current_request = 1 # The depot as default
-        
-        # Construct Canonical Solution Randomly
-        # random.seed(len(not_visited_nodes))                
         # picked_choice = random.choice(list(not_visited_nodes)) # Pick a random request
         previous_score = 0
-        picked_choice = 0
+        picked_request = 0
         probability_of_going_to_request = {}
         sum_of_all_available_requests_score = 0
         while len(not_visited_nodes) != 0:
-            for request in range(len(not_visited_nodes)):
-                distance = euclideanDistance(data.nodes[current_request]["pt"], data.nodes[picked_choice]["pt"]) # Calculate the distance
+            for key, _ in not_visited_nodes.items():
+                distance = euclideanDistance(data.nodes[current_request]['pt'], data.nodes[key]['pt']) # Calculate the distance
                 request_to_request_score = pheromone_level ** alpha * (1.0 / distance) ** beta # Calculate the probabiltity
+                
                 sum_of_all_available_requests_score += request_to_request_score # Summation of all scores
-                probability_of_going_to_request[request] = request_to_request_score # Probability pr request
+                probability_of_going_to_request[key] = request_to_request_score # Probability pr request
             
-            for i in probability_of_going_to_request:
-                prob_go_to_request = probability_of_going_to_request[i] / sum_of_all_available_requests_score
+            # print(probability_of_going_to_request)
+            for key, value in probability_of_going_to_request.items():
+                prob_go_to_request = value / sum_of_all_available_requests_score
                 if prob_go_to_request > previous_score: # If the probability is higher, choose the new point
-                    picked_choice = request
-
+                    picked_request = key
+                    
                 previous_score = prob_go_to_request
             
+            probability_of_going_to_request.clear() # Clear the probability map for next check
+            sum_of_all_available_requests_score = 0 # Reset SUM
 
-            
             # pheromone_map[current_request] = Trail(picked_choice, pheromone_level)
 
-            
-            if q+not_visited_nodes[picked_choice]["rq"] <= data.capacity: # Check capacity constraint
-                q += not_visited_nodes[picked_choice]["rq"] # Update the current capacity used for the route
-                current_request = picked_choice # New current request
-                del not_visited_nodes[picked_choice] # Remove request from the list
-                print("LEN: ", len(not_visited_nodes))
-                route += [current_request-1]
+            if q+not_visited_nodes[picked_request]['rq'] <= data.capacity: # Check capacity constraint
+                q += not_visited_nodes[picked_request]["rq"] # Update the current capacity used for the route
+                current_request = picked_request # New current request
+                del not_visited_nodes[current_request] # Remove request from the list
+                if len(not_visited_nodes) == 0: # Since the while loop is going to end after this, we are adding the route to all the routes
+                    solution.routes += [route+[0]]
+                    route = [0]
+                route += [current_request]
             else:
                 solution.routes += [route+[0]]
                 route = [0]
                 q = data.nodes[current_request]["rq"]
-
         print("Pheromone Map: ", pheromone_map)
         return solution
         
@@ -110,8 +116,12 @@ class Ant:
     def algorithm(self, data, solution, seed=None):
         random.seed(seed)
         solution = self.aco(data, solution)
-
-        print("Cost", solution.cost())
+        local_best = solution.cost()
+        if global_best == 0:
+            global_best = local_best
+        if local_best < global_best:
+            global_best = local_best
+        print("Cost", local_best)
         return solution
 
 
