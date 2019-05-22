@@ -12,7 +12,7 @@ all-g: clean
 	find ../data -name '*.xml' -exec make args=-g "{}" + 
 
 %.xml: main.py
-	$(PY) main.py -t 10 -o `basename $*` $(args) $@
+	$(PY) main.py -t 1 -o `basename $*` $(args) $@
 
 clean :
 	rm -f *.sol

@@ -40,10 +40,14 @@ def solve(instance, alg, config):
         sol = ch.construct(config.time_limit-t0)
         temp_instance_times_costs += [0, sol.cost(), round(t0, 2)]
     except TimeOutExeption as e:
-        print("timeout")
+        # print("timeout")
         sol = e.solution
+    
+    sol.fulfill_sol()
     for i in range(len(sol.routes)):
-        print("[{}]".format(i), sol.routes[i])
+        print("[{}:{}]".format(i, sol.route_index_capacity(i)), sol.routes[i])
+    assert sol.valid_solution()
+
     return sol
 
 

@@ -4,6 +4,15 @@ import matplotlib.pyplot as plt
 
 import data
 
+from collections import deque
+
+
+def rotate_til_depot_first(tour):
+    dq = deque(tour)
+    while dq[0] != 0:
+        dq.rotate()
+    return list(dq)
+
 
 class Solution:
     routes = []
@@ -37,6 +46,14 @@ class Solution:
         if 0 in customer_visited:
             print("visited depots in middle of tour")
             return False
+
+        # check capacity
+        for i in range(len(self.routes)):
+            # print(i, self.instance.route_capacity(self.routes[i]), self.instance.route_capacity(
+            #     self.routes[i]) > self.instance.capacity)
+            if self.instance.route_capacity(self.routes[i]) > self.instance.capacity:
+                print("capacity exceeded at [{}]:{}".format(i, self.routes[i]))
+                return False
 
         for firstRoute in self.routes:
             # checking capacity
@@ -86,6 +103,11 @@ class Solution:
                  style, color=color)
         plt.axis('scaled')
         plt.axis('off')
+
+    def fulfill_sol(self):
+        self.routes = [rotate_til_depot_first(
+            r) + [0] for r in self.routes]
+
 
     def plot_instance_points(self):
         self.instance.plot_points(show=False)

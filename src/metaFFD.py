@@ -75,83 +75,160 @@ def routes_two_opt(routes, distance):
 
 
 def is_accept(before_length, after_length, temp):
-    # print("temp", temp, "cond", math.exp(-(after_length-before_length)/temp))
-    return random.random() <= math.exp(-(after_length-before_length)/temp)
+    # using try to avoid OverflowError when math.exp is too low
+    try:
+        prob = math.exp(-(after_length - before_length) /
+                        temp)
+        accept = random.random() <= prob
+        # print("del", after_length-before_length,
+        #       "temp", temp,
+        #       "inexp", -(after_length - before_length) / temp,
+        #       "prob", prob,
+        #       "is better", before_length > after_length,
+        #       "is accept", accept
+        #       )
+        return accept
+    except OverflowError:
+        return False
 
 
-def simulated_annealing(data, solution, distance, temp=1000, iteration=1000000, alpha=0.95):
+def get_exchangable_nodes(data, route, from_point, from_route_curr_cap, to_route_curr_cap):
 
-    improving_routes = solution.routes.copy()
-    best_cost_found = solution.cost()
+    max_cap = data.capacity
+    incoming_node_cap = data.nodes[from_point]['rq']
 
-    for i in range(iteration):
-        temp = iteration/(i+1)
-        # randomly choose customer to exchange
-        from_route = random.randint(0, len(improving_routes)-1)
-        from_point = random.choice(
-            [p for p in improving_routes[from_route] if p != 0])
-        from_point_index = improving_routes[from_route].index(
-            from_point)
+    upper_bound = max_cap - (from_route_curr_cap - incoming_node_cap)
+    lower_bound = to_route_curr_cap - (max_cap - incoming_node_cap)
+    # print(upper_bound, lower_bound)
+    possible_nodes = []
+    def all_possible_comb(current_node, current_cap, knapsack):
 
-        from_point_cap = data.nodes[from_point]['rq']
-        from_route_remaining_cap = data.capacity - (data.route_capacity(improving_routes[from_route]) -
-                                                    from_point_cap)
+        if current_node == len(route):
+            cap_sum = data.route_capacity(knapsack)
+            # check if solution is still feasible after move points in knapsack to other route
+            if cap_sum > lower_bound:
+                possible_nodes.append(knapsack)
+            return
 
-        # randomly choose route to exchange to
-        to_route = random.randint(0, len(improving_routes) - 2)
-        if to_route >= from_route:
-            to_route += 1
-        # to_route_remaining_cap = data.capacity - \
-        #     solution.route_index_capacity(to_route)
-        to_cand_list = [p for p in improving_routes[to_route]
-                        if data.nodes[p]['rq'] <= from_route_remaining_cap and p != 0]
-        # randomly select candidate from to exchange
-        if len(to_cand_list) == 0:
-            # no candidate to swap
-            continue
+        # not take depot
+        if route[current_node] == 0:
+            all_possible_comb(current_node + 1, current_cap, list(knapsack))
         else:
-            to_point = random.choice(to_cand_list)
-            to_point_index = improving_routes[to_route].index(
-                to_point)
+            # not take this node
+            all_possible_comb(current_node + 1, current_cap, list(knapsack))
 
-        # print("from: ", improving_routes[from_route], from_point,
-        #       from_point_cap, from_route_remaining_cap)
-        # print("to: ", improving_routes[to_route],
-        #       to_cand_list, to_point)
+            # take this node
+            if (current_cap + data.nodes[route[current_node]]['rq'] <= upper_bound):
+                knapsack.append(route[current_node])
+                current_cap += data.nodes[route[current_node]]['rq']
+                all_possible_comb(current_node + 1, current_cap, knapsack)
 
-        # do exchange and 2 opt, look at the improvement
-        # from_temp_tour = improving_routes[from_route][:from_point_index-1] + \
-        #     [to_point] + \
-        #     improving_routes[from_route][from_point_index:]
-        # to_temp_tour = improving_routes[to_route][:to_point_index-1] + \
-        #     [from_point] + \
-        #     improving_routes[to_route][to_point_index:]
-        from_temp_tour = improving_routes[from_route].copy()
-        to_temp_tour = improving_routes[to_route].copy()
-        from_temp_tour[from_point_index], to_temp_tour[to_point_index] = to_temp_tour[to_point_index], from_temp_tour[from_point_index]
-        # print(from_point, to_point,from_temp_tour,to_temp_tour)
-        from_temp_tour = two_opt_first_gain(from_temp_tour, distance)
-        to_temp_tour = two_opt_first_gain(to_temp_tour, distance)
+    all_possible_comb(0, 0, [])
 
-        before_cost = data.route_length(
-            improving_routes[from_route]) + data.route_length(improving_routes[to_route])
-        
-        after_cost = data.route_length(
-            from_temp_tour) + data.route_length(to_temp_tour)
-        # print('[before]f : {}, t:{} cost:{}'.format(
-        #     improving_routes[from_route], improving_routes[to_route], before_cost))
-        # print('[after]f : {}, t:{} cost:{}'.format(
-        #     from_temp_tour, to_temp_tour, after_cost))
+    return possible_nodes
+    # print("poss", possible_nodes, lower_bound, upper_bound)
+    # point_cap = []
+    # if to_route_curr_cap + incoming_node_cap < max_cap:
+    #     point_cap.append("n")
 
-        if is_accept(before_cost, after_cost, temp):
-            improving_routes[from_route] = from_temp_tour
-            improving_routes[to_route] = to_temp_tour
-            
-            new_cost = sum([data.route_length(r) for r in improving_routes])
-            print(new_cost)
-            if new_cost < best_cost_found:
-                best_cost_found = new_cost
-                solution.routes = improving_routes.copy()
+    # for p in route:
+    #     if max_cap >= ((from_route_curr_cap - incoming_node_cap) + data.nodes[p]['rq']) and max_cap >= ((to_route_curr_cap - data.nodes[p]['rq']) + incoming_node_cap) and p != 0:
+    #         point_cap.append(p)
+
+    # return point_cap
+
+
+def simulated_annealing(data, solution, distance, temp=1000, alpha=0.95, trying=500):
+    # simulated_annealing is a metaheuristic method
+    # temp = initial temperature
+    # alpha = parameter to perform geometric cooling
+    # trying = number of trying when better tour is not found
+    first_sol = solution.routes.copy()
+    first_sol_cost = solution.cost()
+
+    best_cost_found = first_sol_cost
+    current_improving_routes_cost = first_sol_cost
+
+    while True:
+        # start with frist sol
+        improving_routes = first_sol.copy()
+        current_iter_best_cost = first_sol_cost
+        current_improving_routes_cost = first_sol_cost
+        curr_try = 0
+        curr_temp = temp
+
+        while True:
+            # simulated annealing iteration
+            if curr_try > trying:
+                break
+            # randomly choose customer to exchange
+            from_route = random.randint(0, len(improving_routes)-1)
+            from_point = random.choice(
+                [p for p in improving_routes[from_route] if p != 0])
+            from_point_index = improving_routes[from_route].index(
+                from_point)
+
+            # randomly choose route to exchange to
+            to_route = random.randint(0, len(improving_routes) - 2)
+            if to_route >= from_route:
+                to_route = (to_route + 1) % len(improving_routes)
+
+            to_cand_list = get_exchangable_nodes(
+                data, improving_routes[to_route], from_point, data.route_capacity(improving_routes[from_route]), data.route_capacity(improving_routes[to_route]))
+
+            # randomly select candidate from to exchange
+            if len(to_cand_list) == 0:
+                # no candidate to swap
+                # print("no candidate")
+                continue
+
+            to_points = random.choice(to_cand_list)
+            from_temp_tour = improving_routes[from_route].copy()
+            to_temp_tour = improving_routes[to_route].copy()
+
+            if not to_points:
+                # check is array is empty
+                # just move point from route "from" to route "to"
+                to_temp_tour.append(from_temp_tour[from_point_index])
+                del from_temp_tour[from_point_index]
+            else:
+                from_temp_tour += to_points
+                to_temp_tour.append(from_temp_tour[from_point_index])
+
+                del from_temp_tour[from_point_index]
+                to_temp_tour = [n for n in to_temp_tour if n not in to_points]
+
+            from_temp_tour = two_opt_first_gain(from_temp_tour, distance)
+            to_temp_tour = two_opt_first_gain(to_temp_tour, distance)
+
+            before_tours_cost = data.route_length(
+                improving_routes[from_route]) + data.route_length(improving_routes[to_route])
+            after_tours_cost = data.route_length(
+                from_temp_tour) + data.route_length(to_temp_tour)
+
+            after_cost = current_improving_routes_cost - \
+                before_tours_cost + after_tours_cost
+            # print('[before]f : {}, t:{} cost:{}'.format(
+            #     improving_routes[from_route], improving_routes[to_route], before_cost))
+            # print('[after]f : {}, t:{} cost:{}'.format(
+            #     from_temp_tour, to_temp_tour, after_cost))
+
+            if is_accept(current_iter_best_cost, after_cost, curr_temp):
+                improving_routes[from_route] = from_temp_tour
+                improving_routes[to_route] = to_temp_tour
+
+                current_improving_routes_cost = after_cost
+                # print(current_improving_routes_cost)
+                curr_temp *= alpha
+                curr_try = 0
+
+                if current_improving_routes_cost < current_iter_best_cost:
+                    current_iter_best_cost = current_improving_routes_cost
+                    if current_improving_routes_cost < best_cost_found:
+                        best_cost_found = current_improving_routes_cost
+                        solution.routes = improving_routes.copy()
+            else:
+                curr_try += 1
 
         # update temp
     return solution
@@ -160,9 +237,11 @@ def simulated_annealing(data, solution, distance, temp=1000, iteration=1000000, 
 def algorithm(data, solution, seed=4):
     random.seed(seed)
     solution = ffd(data, solution)
+    solution.routes = solution.routes
+    first_sol = solution
     old_cost = solution.cost()
 
-    solution.routes = routes_two_opt(solution.routes, data.pre_distance)
+    first_sol.routes = routes_two_opt(first_sol.routes, data.pre_distance)
+
     solution = simulated_annealing(data, solution, data.pre_distance)
-    print("improvement", old_cost - solution.cost())
     return solution
