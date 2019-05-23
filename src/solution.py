@@ -4,6 +4,15 @@ import matplotlib.pyplot as plt
 
 import data
 
+from collections import deque
+
+
+def rotate_til_depot_first(tour):
+    dq = deque(tour)
+    while dq[0] != 0:
+        dq.rotate()
+    return list(dq)
+
 
 class Solution:
     routes = []
@@ -27,8 +36,9 @@ class Solution:
         leavingVehicles = 0
         enteringVehicles = 0
         max_capacity = self.instance.capacity
+        routes = self.fulfilled_sol()
         customer_visited = [
-            customer_point for route in self.routes for customer_point in route[1:-1]]
+            customer_point for route in routes for customer_point in route[1:-1]]
 
         # check if visiting customer more than once
         if len(customer_visited) != len(set(customer_visited)):
@@ -38,7 +48,15 @@ class Solution:
             print("visited depots in middle of tour")
             return False
 
-        for firstRoute in self.routes:
+        # check capacity
+        for i in range(len(routes)):
+            # print(i, self.instance.route_capacity(routes[i]), self.instance.route_capacity(
+            #     routes[i]) > self.instance.capacity)
+            if self.instance.route_capacity(routes[i]) > self.instance.capacity:
+                print("capacity exceeded at [{}]:{}".format(i, routes[i]))
+                return False
+
+        for firstRoute in routes:
             # checking capacity
             route_capacity = sum([self.instance.route_capacity(firstRoute)])
             if route_capacity > max_capacity:
@@ -49,7 +67,7 @@ class Solution:
             if firstRoute[-1] == 0:
                 enteringVehicles += 1
 
-            for secondRoute in self.routes:
+            for secondRoute in routes:
 
                 if firstRoute != secondRoute:
                     # Constraint #1
@@ -76,7 +94,7 @@ class Solution:
 
     def write_to_file(self, filename):
         with open(filename, "w") as filehandle:
-            for route in self.routes:
+            for route in self.fulfilled_sol():
                 filehandle.write(
                     ",".join(map(lambda x: str(self.instance.nodes[x]["id"]), route)) + "\n")
 
@@ -86,6 +104,10 @@ class Solution:
                  style, color=color)
         plt.axis('scaled')
         plt.axis('off')
+
+    def fulfilled_sol(self):
+        return [rotate_til_depot_first(
+            r) + [0] for r in self.routes]
 
     def plot_instance_points(self):
         self.instance.plot_points(show=False)
