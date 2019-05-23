@@ -106,8 +106,12 @@ class Solution:
         plt.axis('off')
 
     def fulfilled_sol(self):
-        return [rotate_til_depot_first(
-            r) + [0] for r in self.routes]
+        routes = [rotate_til_depot_first(
+            r) for r in self.routes]
+        for r in routes:
+            if r[-1] != 0:
+                r += [0]
+        return routes
 
     def plot_instance_points(self):
         self.instance.plot_points(show=False)
