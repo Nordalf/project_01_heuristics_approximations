@@ -34,7 +34,7 @@ def solve(instance, alg, config):
     global instance_times_costs
     temp_instance_times_costs = []
     t0 = time.clock()
-    ch = MetaHeuristic(instance, alg)
+    ch = MetaHeuristic(instance, alg, output_file=config.output_file)
     # returns an object of type Solution
     try:
         sol = ch.construct(config.time_limit-t0)
@@ -43,7 +43,6 @@ def solve(instance, alg, config):
         # print("timeout")
         sol = e.solution
     
-    sol.fulfill_sol()
     # for i in range(len(sol.routes)):
     #     print("[{}:{}]".format(i, sol.route_index_capacity(i)), sol.routes[i])
     assert sol.valid_solution()

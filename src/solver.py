@@ -40,14 +40,16 @@ class MetaHeuristic:
     alg = None
     solution = None
     seed = 4
+    output_file = None
 
-    def __init__(self, instance=None, alg=None, seed=4):
+    def __init__(self, instance=None, alg=None, seed=4, output_file=None):
         assert instance is not None
         assert alg is not None
         self.instance = instance
         self.alg = alg
         self.solution = solution.Solution(self.instance)
         self.seed = seed
+        self.output_file = output_file
 
     def timeoutHandler(self, signum, frame):
         raise TimeOutExeption(self.solution)
@@ -62,5 +64,6 @@ class MetaHeuristic:
 
     def canonical_solution(self):
         self.solution = solution.Solution(self.instance)
-        self.solution = self.alg(self.instance, self.solution, self.seed)
+        self.solution = self.alg(
+            self.instance, self.solution, seed=self.seed, output_file=self.output_file)
         return self.solution

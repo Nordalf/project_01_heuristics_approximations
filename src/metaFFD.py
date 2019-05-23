@@ -101,9 +101,10 @@ def get_exchangable_nodes(data, route, from_point, from_route_curr_cap, to_route
     lower_bound = to_route_curr_cap - (max_cap - incoming_node_cap)
     # print(upper_bound, lower_bound)
     possible_nodes = []
-    def all_possible_comb(current_node, current_cap, knapsack):
+    nodes = random.sample(route, 3)
 
-        if current_node == len(route):
+    def all_possible_comb(current_node, current_cap, knapsack):
+        if current_node == len(nodes):
             cap_sum = data.route_capacity(knapsack)
             # check if solution is still feasible after move points in knapsack to other route
             if cap_sum > lower_bound:
@@ -111,17 +112,18 @@ def get_exchangable_nodes(data, route, from_point, from_route_curr_cap, to_route
             return
 
         # not take depot
-        if route[current_node] == 0:
+        if nodes[current_node] == 0:
             all_possible_comb(current_node + 1, current_cap, list(knapsack))
         else:
             # not take this node
             all_possible_comb(current_node + 1, current_cap, list(knapsack))
 
             # take this node
-            if (current_cap + data.nodes[route[current_node]]['rq'] <= upper_bound):
-                knapsack.append(route[current_node])
-                current_cap += data.nodes[route[current_node]]['rq']
-                all_possible_comb(current_node + 1, current_cap, knapsack)
+            if (current_cap + data.nodes[nodes[current_node]]['rq'] <= upper_bound):
+                knapsack.append(nodes[current_node])
+                current_cap += data.nodes[nodes[current_node]]['rq']
+                all_possible_comb(current_node + 1,
+                                  current_cap, list(knapsack))
 
     all_possible_comb(0, 0, [])
 
@@ -138,7 +140,7 @@ def get_exchangable_nodes(data, route, from_point, from_route_curr_cap, to_route
     # return point_cap
 
 
-def simulated_annealing(data, solution, distance, temp=1000, alpha=0.95, trying=500):
+def simulated_annealing(data, solution, distance, temp=1000, alpha=0.95, trying=100, output_file=None):
     # simulated_annealing is a metaheuristic method
     # temp = initial temperature
     # alpha = parameter to perform geometric cooling
@@ -175,7 +177,6 @@ def simulated_annealing(data, solution, distance, temp=1000, alpha=0.95, trying=
 
             to_cand_list = get_exchangable_nodes(
                 data, improving_routes[to_route], from_point, data.route_capacity(improving_routes[from_route]), data.route_capacity(improving_routes[to_route]))
-
             # randomly select candidate from to exchange
             if len(to_cand_list) == 0:
                 # no candidate to swap
@@ -218,7 +219,7 @@ def simulated_annealing(data, solution, distance, temp=1000, alpha=0.95, trying=
                 improving_routes[to_route] = to_temp_tour
 
                 current_improving_routes_cost = after_cost
-                # print(current_improving_routes_cost)
+                # print(current_improving_routes_cost, current_iter_best_cost, best_cost_found)
                 curr_temp *= alpha
                 curr_try = 0
 
@@ -227,6 +228,9 @@ def simulated_annealing(data, solution, distance, temp=1000, alpha=0.95, trying=
                     if current_improving_routes_cost < best_cost_found:
                         best_cost_found = current_improving_routes_cost
                         solution.routes = improving_routes.copy()
+                        if output_file is not None:
+                            assert solution.valid_solution()
+                            solution.write_to_file(output_file+'.sol')
             else:
                 curr_try += 1
 
@@ -234,14 +238,16 @@ def simulated_annealing(data, solution, distance, temp=1000, alpha=0.95, trying=
     return solution
 
 
-def algorithm(data, solution, seed=4):
+def algorithm(data, solution, seed=4, output_file=None):
     random.seed(seed)
     solution = ffd(data, solution)
     solution.routes = solution.routes
     first_sol = solution
-    old_cost = solution.cost()
 
     first_sol.routes = routes_two_opt(first_sol.routes, data.pre_distance)
-
-    solution = simulated_annealing(data, solution, data.pre_distance)
+    if output_file is not None:
+        assert solution.valid_solution()
+        solution.write_to_file(output_file+'.sol')
+    solution = simulated_annealing(
+        data, solution, data.pre_distance, output_file=output_file)
     return solution
