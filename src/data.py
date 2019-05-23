@@ -104,6 +104,9 @@ class Data:
         "The distance between two points."
         return round(abs(A - B), self.decimals)
 
+    def node_id_capacity(self, node_index):
+        return [n for n in self.nodes if n['id'] == node_index][0]
+
     def node_capacity(self, node_index):
         return self.nodes[node_index]["rq"]
 
@@ -160,8 +163,17 @@ class Data:
         return sum(self.node_capacity(point_index) for point_index in route)
 
     def route_length(self, route):
-        return sum(self.pre_distance(route[i], route[i-1]) for i in range(len(route)))
+        return sum(self.pre_distance(route[i], route[i - 1]) for i in range(len(route)))
 
+    def lkh_y1_candidate(self, route, x1):
+        removed_dist = self.pre_distance(x1[0], x1[1])
+        result = []
+        for customer3 in [c for c in route if c != x1[1]]:
+            added_dist = self.pre_distance(x1[1], customer3)
+            if added_dist < removed_dist:
+                result.append(((x1[1], customer3), added_dist))
+        return result
+        
     def plot_points(self, show=True, outputfile_name=None):
         "Plot instance points."
         style = 'bo'
