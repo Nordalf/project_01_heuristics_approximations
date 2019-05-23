@@ -3,7 +3,7 @@ PY=python3
 .PHONY : %.xml clean
 
 A-n32-k05:
-	$(PY) main.py -t 0 -o "CVRP" "../data/Augerat-A/augerat-1995-set-a/A-n32-k05.xml"
+	$(PY) main.py -t 20 -o "CVRP" "../data/Augerat-A/augerat-1995-set-a/A-n32-k05.xml"
 
 all: clean
 	find ../data -name '*.xml' -exec make "{}" + 

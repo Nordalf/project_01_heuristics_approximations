@@ -33,7 +33,7 @@ class Data:
     distances = dict()
 
     def __init__(self, filename):
-
+        
         tree = ET.parse(filename)
         root = tree.getroot()
 
@@ -89,6 +89,8 @@ class Data:
         if i == j:
             return (0)
         if j < i:
+            # print("I: ", i, " J: ", j)
+            # print("DIST: ", self.distances[(j, i)])
             return (self.distances[(j, i)])
         return (self.distances[(i, j)])
 
