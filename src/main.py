@@ -44,8 +44,8 @@ def solve(instance, alg, config):
         sol = e.solution
     
     sol.fulfill_sol()
-    for i in range(len(sol.routes)):
-        print("[{}:{}]".format(i, sol.route_index_capacity(i)), sol.routes[i])
+    # for i in range(len(sol.routes)):
+    #     print("[{}:{}]".format(i, sol.route_index_capacity(i)), sol.routes[i])
     assert sol.valid_solution()
 
     return sol
