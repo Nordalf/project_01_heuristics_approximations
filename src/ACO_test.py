@@ -45,15 +45,6 @@ class Ant:
     global_best = 0
     global_best_route = []
 
-    
-
-
-    class Trail:
-        visited_trail = 0
-        def __init__(self, pheromone):
-            self.pheromone = pheromone
-            visited_trail += 1
-
     def aco(self, data, solution, max_iterations=5):
         route = [0]
         Q = data.capacity # Max Capacity
