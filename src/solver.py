@@ -57,8 +57,6 @@ class MetaHeuristic:
     def construct(self, time_left):
         signal.signal(signal.SIGALRM, self.timeoutHandler)
         timeout = math.ceil(time_left)
-        if timeout > 200:
-            timeout -= 40
         signal.alarm(timeout)
         return self.canonical_solution()
 
