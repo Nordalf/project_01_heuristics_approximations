@@ -30,7 +30,7 @@ instance_times_costs = []
 def solve(instance, alg, config):
     global instance_times_costs
     temp_instance_times_costs = []
-    t0 = time.clock()
+    t0 = time.process_time()
     ch = ConstructionHeuristics(instance, alg)
     # returns an object of type Solution
     try:
