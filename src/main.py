@@ -167,8 +167,8 @@ def main(argv):
         instance = data.Data(config.instance_file)
         # alg = solverNN.algorithm
         # alg = solverCHH.algorithm
-        # alg = ACO_test.Ant().algorithm
-        alg = metaFFD.algorithm
+        alg = ACO_test.Ant().algorithm
+        # alg = metaFFD.algorithm
         sol = solve(instance, alg, config)
         if config.output_file is not None:
             if config.graphic_sol:
