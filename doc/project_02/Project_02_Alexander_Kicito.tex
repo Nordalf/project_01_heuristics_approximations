@@ -45,41 +45,41 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{titlepage}
-	\centering
+    \centering
     \vspace*{0.5 cm}
     \includegraphics[scale = 0.5]{SDU_logo.png}\\[1.0 cm]	% University Logo
     \textsc{\LARGE University of Southern Denmark}\\[2.0 cm]	% University Name
-	\textsc{\Large DM852}\\[0.5 cm]				% Course Code
-	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
-	{ \huge \bfseries \thetitle}\\
-	\rule{\linewidth}{0.2 mm} \\[1.5 cm]
-	
-	\begin{minipage}{0.4\textwidth}
-		\begin{flushleft} \large
-			\emph{Submitted To:}\\
-			Marco Chiarandini\\
+    \textsc{\Large DM852}\\[0.5 cm]				% Course Code
+    \rule{\linewidth}{0.2 mm} \\[0.4 cm]
+    { \huge \bfseries \thetitle}\\
+    \rule{\linewidth}{0.2 mm} \\[1.5 cm]
+    
+    \begin{minipage}{0.4\textwidth}
+        \begin{flushleft} \large
+            \emph{Submitted To:}\\
+            Marco Chiarandini\\
             Lene Monrad Favrholdt \\
-			IMADA \\
-			Mathematics \& Computer Science Department \\
-			\end{flushleft}
-			\end{minipage}~
-			\begin{minipage}{0.4\textwidth}
-            
-			\begin{flushright} \large
-			\emph{Submitted By :} \\
-			Alexander Lerche Falk\\
+            IMADA \\
+            Mathematics \& Computer Science Department \\
+        \end{flushleft}
+    \end{minipage}~
+    \begin{minipage}{0.4\textwidth}
+        
+        \begin{flushright} \large
+            \emph{Submitted By :} \\
+            Alexander Lerche Falk\\
             Narongrit Unwerawattana\\
             Spring - Master of Computer Science\\
-		\end{flushright}
+        \end{flushright}
         
-	\end{minipage}\\[2 cm]
-	
-	
+    \end{minipage}\\[2 cm]
     
     
     
     
-	
+    
+    
+    
 \end{titlepage}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -107,7 +107,7 @@ We will compare the algorithms with our previous heuristic / local search projec
 
 \newpage
 
-\section{Simulated Annealing} 
+\section{Simulated Annealing}
 
 
 The Simulated Annealing (SA) algorithm is inspired from the annealing process in metal, where you are altering the physical state of the metal 
@@ -115,24 +115,21 @@ by heating and cooling it. The inspiration can be used in computer science as we
 to the problem and not "care" about the initial solutions. The better steps we are taking, and better solutions we are finding, the more careful we are going to be in finding 
 a solution. In the beginning we allow random and bad steps to be performed, while later, we make better calculations.
 \newline
-We have developed an algorithm to solve CVRP using Simulated Annealing technique by relating CVRP with existed problems i.e. Bin packing problem and Knapsack problem. Using this approach, we can guarantee maximum amount of vehicles necessary required with approximation analysis on bin packing hueristic algorithm. In this demonstration, we use well studied  algorithm First-Fit-Decreasing which is guaranteed to use no more than $\frac{11}{9}\textsc{OPT} + 1$ number of required vehicles\cite{FFD}. With combination of simple Traveling Salesman Problem's local search algorithm, 2-opt, we are able create the initial feasible solution as described in~\ref{alg:alg_ffd}. Next step of Simulated Annealing involved creating new feasible solution by altering current solution. Which in CVRP case, is to perform points exchange action between routes. In order to allow as much possibility of exchanges as it could without breaking capacity constrain, we choose simple algorithm to find exchanges possibility based on Knapsack problem~\ref{alg:alg_knapsackcom}.
+We have developed an algorithm to solve CVRP using Simulated Annealing technique by relating CVRP with existed problems i.e. Bin packing problem and Knapsack problem. Using this approach, we can guarantee maximum amount of vehicles necessary required with approximation analysis on bin packing hueristic algorithm. In this demonstration, we use well studied  algorithm First-Fit-Decreasing which is guaranteed to use no more than $\frac{11}{9}\textsc{OPT} + 1$ number of required vehicles\cite{FFD}. With combination of simple Traveling Salesman Problem's local search algorithm, 2-opt, we are able create the initial feasible solution as described in Algorithm~\ref{alg:alg_ffd}. Next step of Simulated Annealing involved creating new feasible solution by altering current solution. Which in CVRP case, is to perform points exchange action between routes. In order to allow as much possibility of exchanges as it could without breaking capacity constrain, we choose simple algorithm to find exchanges possibility based on Knapsack problem~\ref{alg:alg_knapsackcom}. Our implementation of acceptance criterion is based on Metropolis condition which accept new solution by using probability $p = \exp[−\frac{new\_cost − best\_cost}{temp}]$, this leads to $p = 1$ when $new\_cost < best\_cost$ otherwise $p = [0,1)$. We use geometric cooling scheme in order to update temperature every iteration the algorithm accepts new solution by multiply temperature variables with $alpha$ where  $alpha=(0,1)$. This makes $p$ have lower probability to accept worsen solution after later iteration. All algorithms is described as following.
 
 \begin{algorithm}[!h]
-	\caption{Simulated annealing with First-Fit-Decreasing and Knapsack combination}
-	\label{alg:alg_sa}
-
+    \small
+    \caption{Simulated annealing with First-Fit-Decreasing and Knapsack combination}
+    \label{alg:alg_sa}
+    
     \begin{algorithmic}[1]
-    \Require{$customers$: List of customer coordinate with it's capacity}
-
-	\Require{$route\_cap(route)$: returns capacity of route} 
-	\Require{$route\_cost(route)$: returns capacity of route} 
-	\Require{$tsp\_local\_search(route)$: performs travelling salesman local search and returns improved route}
-	\Require{$is\_accept(best\_cost, cost, temp)$: an acceptance criterion function returns boolean based on Metopolis condition}
-
-	\Require{$max\_cap$: Maximum capacity for each route} 
-	\Require{$depot$: Depot point} 
-
-	\Function{simulated\_annealing\_ffd}{{$customers, temp, alpha, no\_improve\_limits$}}
+        \Require{$customers$: List of customer coordinate with it's capacity}
+        \Require{$max\_cap$: Maximum capacity for each route}
+        \Require{$depot$: Depot point}
+        
+        \Require{$is\_accept(best\_cost, cost, temp)$: an acceptance criterion function returns boolean based on Metopolis condition}
+        
+        \Function{simulated\_annealing\_ffd}{{$temp, alpha, no\_improve\_limits$}}
         \State $routes \gets \textsc{cvrp\_first\_fit\_decreasing}(customers,depot)$
         \State $best\_cost \gets$ total cost of $routes$
         \State $best\_routes \gets routes$
@@ -140,133 +137,161 @@ We have developed an algorithm to solve CVRP using Simulated Annealing technique
         \State $current\_routes \gets routes$
         \State $curr\_no\_improve\_trying \gets 0$
         \While{True}
-            \If{$curr\_no\_improve\_trying == no\_improve\_limits$}
-            break
-            \EndIf
-            \State $origin\_route\_id, target\_route\_id \gets$ randomly pick 2 distinct index of $routes$
-            \State $origin\_route\_point \gets$ randomly pick element from $route[origin\_route\_id]$
-            
-            \State $upper\_bound, lower\_bound \gets$ maximum and minimum capacity such that solution still feasible after exchange action
-
-            % \State $upper\_bound \gets max\_cap - (route\_cap(routes[origin\_route\_id] - origin\_route\_point.capacity))$
-
-            % \State $lower\_bound \gets route\_cap(routes[target\_route\_id]) - (max\_cap - origin\_route\_point.capacity)$
-
-            \State $target\_neighbors\_set \gets \textsc{knapsack\_combination}($
-            \Statex $route[target\_route\_id], lower\_bound, upper\_bound)$
-
-            \If{$len(target\_neighbors\_set) == 0$}
-                continue
-            \EndIf
-
-            \State $target\_neighbors \gets$ randomly pick an element from $target\_neighbors\_set$
-
-            \State $new\_route\_i, new\_route\_i \gets$ exchange neighbors between two route and assign to new variables
-
-            \State $new\_route\_i \gets tsp\_local\_search(new\_route\_i)$  
-            \State $new\_route\_j \gets tsp\_local\_search(new\_route\_j)$
-
-            \State $old\_tours\_cost \gets route\_cost(route[origin\_route\_id]) + route\_cost(route[target\_route\_id])$
-            \State $new\_tours\_cost \gets route\_cost(new\_route\_i) + route\_cost(new\_route\_j)$
-
-            \State $new\_cost \gets current\_cost - old\_tours\_cost + new\_tours\_cost$
-            
-            \If{$is\_accept(best\_cost, new\_cost, temp)$}
-                \State update $temp$ with $alpha$
-                \State update $current\_routes$ with new routes
-                \State $curr\_no\_improve\_trying \gets 0$
-                \If{$new\_cost < best\_cost$}
-                    \State update best\_cost and best\_routes with new routes
-                \EndIf
-            \Else
-                \State $curr\_no\_improve\_trying \gets curr\_no\_improve\_trying + 1$
-            \EndIf
+        \If{$curr\_no\_improve\_trying == no\_improve\_limits$}
+        break
+        \EndIf
+        \State $new\_routes \gets \textsc{neighbors\_selection}(current\_routes)$
+        
+        \State $new\_cost \gets$ cost of $new\_routes$
+        
+        \If{$is\_accept(best\_cost, new\_cost, temp)$}
+        \State $temp \gets temp * alpha$
+        \State $curr\_no\_improve\_trying \gets 0$
+        \State update $current\_routes$ with new routes
+        \If{$new\_cost < best\_cost$}
+        \State update best\_cost and best\_routes with new routes
+        \EndIf
+        \Else
+        \State $curr\_no\_improve\_trying \gets curr\_no\_improve\_trying + 1$
+        \EndIf
         \EndWhile
         \Return $best\_routes$
-	\EndFunction
-	\end{algorithmic}
+        \EndFunction
+    \end{algorithmic}
 \end{algorithm}
 
-
 \begin{algorithm}[!h]
-	\caption{First-Fit-Decreasing for CVRP}
-	\label{alg:alg_ffd}
-	
-    \begin{algorithmic}[1]
-    \Require{$customers$: List of customer coordinate with it's capacity}
-	\Require{$tsp\_local\_search(route)$: performs travelling salesman local search and returns improved route}
-	\Require{$max\_cap$: Maximum capacity for each route} 
-	\Require{$depot$: Depot point} 
-	\Require{$route\_cost(route)$: returns capacity of route} 
+    \small
+    \caption{First-Fit-Decreasing for CVRP}
+    \label{alg:alg_ffd}
     
-    \Ensure{$routes$: solution route}
-    \Function{cvrp\_first\_fit\_decreasing}{{$customers$}}
+    \begin{algorithmic}[1]
+        \Require{$customers$: List of customer coordinate with it's capacity}
+        \Require{$tsp\_local\_search(route)$: performs traveling salesman local search and returns improved route}
+        \Require{$max\_cap$: Maximum capacity for each route}
+        \Require{$depot$: Depot point}
+        \Require{$route\_cost(route)$: returns capacity of route}
+        
+        \Ensure{$routes$: solution routes}
+        \Function{cvrp\_first\_fit\_decreasing}{{$customers$}}
         \State $sorted\_capacity\_points \gets$ sort customer points by it's capacity
         \State $routes \gets []$
-        \State add a route with $depot$ to $routes$
+        \State add new array with $depot$ to $routes$ to create new route
         \ForAll{$point$ in $sorted\_capacity\_points$}
         \State $is\_fit \gets False$
-            \ForAll{$route$ in $routes$}
-            \If{$route\_cost(route) + point.capacity \leq max\_cap$}
-                \State add $point$ to $route$
-                \State $is\_fit \gets True$
-                \State break
-            \EndIf
-            \EndFor
-
-            \If{$!is\_fit$}
-                \State add new route with $depot$ and $point$ to $routes$
-            \EndIf
-        \EndFor
-
         \ForAll{$route$ in $routes$}
-            \State $route \gets tsp\_local\_search(route)$
+        \If{$route\_cost(route) + point.capacity \leq max\_cap$}
+        \State add $point$ to $route$
+        \State $is\_fit \gets True$
+        \State break
+        \EndIf
+        \EndFor
+        
+        \If{$!is\_fit$}
+        \State add new route with $depot$ and $point$ to $routes$
+        \EndIf
+        \EndFor
+        
+        \ForAll{$route$ in $routes$}
+        \State $route \gets tsp\_local\_search(route)$
         \EndFor
         \Return $routes$
-	\EndFunction
-	\end{algorithmic}
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[!h]
+    \small
+    \caption{Neighbours selection for SA}
+    \label{alg:alg_ffd}
+    \begin{algorithmic}[1]
+        \Require{$routes$: list of routes in solution contains customer coordinate and it's capacity required}
+        \Require{$max\_cap$: Maximum capacity for each route}
+        
+        \Require{$route\_cap(route)$: returns capacity of $route$}
+        \Require{$tsp\_local\_search(route)$: performs traveling salesman local search and returns improved route}
+        
+        \Ensure{$new\_routes$: new solution routes}
+        
+        \Function{neighbor\_selection}{{$routes$}}
+        
+        \Repeat
+        \State $origin\_route\_id, target\_route\_id \gets$ randomly pick 2 distinct index of $routes$
+        \State $origin\_route\_point \gets$ randomly pick element from $route[origin\_route\_id]$
+        
+        % \State $upper\_bound, lower\_bound \gets$ maximum and minimum capacity such that solution still feasible after exchange action
+        
+        \State $upper\_bound \gets max\_cap - (route\_cap(routes[origin\_route\_id] - origin\_route\_point.capacity))$
+        
+        \State $lower\_bound \gets route\_cap(routes[target\_route\_id]) - (max\_cap - origin\_route\_point.capacity)$
+        
+        \State $target\_neighbor\_set \gets \textsc{knapsack\_combination}($
+            \Statex $route[target\_route\_id], lower\_bound, upper\_bound)$
+        
+        \Until{$len(target\_neighbor\_set) > 0$}
+        
+        \State $target\_neighbor \gets$ randomly pick an element from $target\_neighbor\_set$
+        
+        \State $new\_route\_origin, new\_route\_target \gets$ exchange neighbors between two route and assign to new variables
+        
+        \State $new\_route\_origin \gets tsp\_local\_search(new\_route\_origin)$
+        \State $new\_route\_target \gets tsp\_local\_search(new\_route\_target)$
+        
+        \State $new\_routes \gets$ $routes$ where $route[origin\_route\_id]$ and $route[target\_route\_id]$ replaced by new routes
+        \State \Return $new\_routes$
+        \EndFunction
+        
+    \end{algorithmic}
 \end{algorithm}
 
 
 \begin{algorithm}[!h]
-	\caption{Knapsack Combination}
-	\label{alg:alg_knapsackcom}
-
-    \begin{algorithmic}[1]
-    \Require{$customers$: List of customer coordinate with it's capacity}
-	\Require{$max\_cap$: Maximum capacity for each route} 
-	\Require{$depot$: Depot point}
-	\Require{$max\_points\_amt$: Number of maximum combination points}
-	\Require{$route\_cap(route)$: returns capacity of route} 
+    \small
+    \caption{Knapsack Combination}
+    \label{alg:alg_knapsackcom}
     
-    \Ensure{$combination\_set$: possible combination of points in route s.t. their capacity not exceeds $max\_cap$}
-    \Function{knapsack\_combination}{$route, lower\_bound, upper\_bound$}
+    \begin{algorithmic}[1]
+        \Require{$customers$: List of customer coordinate with it's capacity}
+        \Require{$max\_cap$: Maximum capacity for each route}
+        \Require{$depot$: Depot point}
+        \Require{$max\_points\_amt$: Number of maximum combination points}
+        \Require{$route\_cap(route)$: returns capacity of $route$}
+        
+        \Ensure{$combination\_set$: set of candidates combination of points in $route$}
+        \Function{knapsack\_combination}{$route, lower\_bound, upper\_bound$}
         
         \State $points \gets$ randomly pick $max\_points\_amt$ points from $route$ but $depot$
         \State $combination\_set \gets$ []
-
+        
         \Function{knapsack\_combination\_recur}{{$current\_point\_id, current\_capacity, knapsack$}}
-            \If{$current\_point\_id == len(points)$}
-                \If{$route\_cap(knapsack) > lower\_bound$}
-                    \State add knapsack to $combination\_set$
-                \EndIf
-            \EndIf
-            \State $knapsack\_combination\_recur($
+        \If{$current\_point\_id == len(points)$}
+        \If{$route\_cap(knapsack) > lower\_bound$}
+        \State add knapsack to $combination\_set$
+        \EndIf
+        \EndIf
+        \State $knapsack\_combination\_recur($
             \Statex $current\_point\_id + 1, current\_capacity, knapsack)$
-
-            \If{$current\_cap + points[current\_point\_id] \leq max\_cap$}
-                \State add $points[current\_point\_id]$ to $knapsack$
-                \State $current\_cap \gets points[current\_point\_id].capacity$
-                \State $knapsack\_combination\_recur($
-                \Statex $current\_point\_id + 1, current\_capacity, knapsack)$
-
-            \EndIf
+        
+        \If{$current\_cap + points[current\_point\_id] \leq max\_cap$}
+        \State add $points[current\_point\_id]$ to $knapsack$
+        \State $current\_cap \gets points[current\_point\_id].capacity$
+        \State $knapsack\_combination\_recur($
+            \Statex $current\_point\_id + 1, current\_capacity, knapsack)$
+        
+        \EndIf
         \EndFunction
         \State $knapsack\_combination(0,0,[])$
         \State \Return $combination\_set$
-	\EndFunction
-	\end{algorithmic}
+        \EndFunction
+    \end{algorithmic}
 \end{algorithm}
+
+\newpage
+\subsection{Complexity and Analysis}
+
+By relating CVRP to other existed problem, we are able to come up with a simple algorithm and use existed technique, Simulated Annealing, to improve the solution. We first analyzing our algorithm to construct our initial routes. Using $\textsc{First-Fit-Decreasing}$ to assign group customer points for a vehicle only have runtime complexity of $O(nlogn)$ but in order to decide customer point sequences for each route, we rely on local search algorithm for traveling salesman problem which dominates runtime complexity of our bin packing algorithm. Using simple 2-opt local search algorithm arrange customer point sequences for each vehicle route yields runtime complexity of $O(n^2)$.
+
+Another key task of Simulated Annealing is the neighbor selection procedure. Our attempt is to find largest possibility of exchanging customer point between routes. The problem is risen when given one customer point chosen by uniform distribution probability, how can we decide other candidate to make exchange action and such candidate should not leads to infeasible solution. Introducing a simple algorithm to find possibility of packing customer point into one set based on brute force algorithm for Knapsack problem, which explore for every customer points either to include in neighbor exchange candidate or not, allows us to find a list of feasible candidates to make exchange between routes. But tradeoff of this algorithm is the runtime complexity, which is $O(2^n)$ where $n$ is number of customer points in candidate route. In order to keep runtime of each Simulated Annealing iteration small, we introduce a user-defined variable $max\_points\_amt$ which an algorithm will use to choose number of customer points in candidate route and proceed the algorithm. This indeed reduces the number of possibility on selecting exchange neighbors candidates but in an instance where it consist of many small capacity point, without limiting such customer point might leads to very long runtime for each neighbor selection process. We conclude that for each iteration of our Simulated Annealing the runtime complexity is in $O(2^n)$ where $n$ is number of maximum points allowed to be exchange.
 
 \include{perf_table}
 
@@ -280,22 +305,22 @@ At some point in their exploration to find the best trail to obtain food, all th
 \newline
 We can apply the logic of the ants in the CVRP as well. By letting the instance \- the space of which the requests are "plotted" \- be the area to find a solution, 
 we can start by sending one "ant" out to a point. From this point, we are going to calculate every probability of moving to the next point \- the one with the highest "score". 
-We can calulate the probabilty of moving by the following: 
+We can calulate the probability of moving by the following: 
 \newline
 First we establish the initial pheromone levels from all the points to every counter other point: \\
 \[
-M = \begin{bmatrix}
-    0 & 0.50 & 0.20           \\[0.3em]
-    0.125 & 0           & 0.60 \\[0.3em]
-    1.20 & 0.355 & 0
-  \end{bmatrix}
+    M = \begin{bmatrix}
+        0     & 0.50  & 0.20 \\[0.3em]
+        0.125 & 0     & 0.60 \\[0.3em]
+        1.20  & 0.355 & 0
+    \end{bmatrix}
 \]
 \begin{figure}[H]
-	\caption{Illustration of the ACO algorithm, showing how it can be used, and how it process next moves}
-	\centering
-	\includegraphics[width=0.9\textwidth]{ACO_Whiteboard.jpg}
-	\label{fig:acowhiteboard}
-
+    \caption{Illustration of the ACO algorithm, showing how it can be used, and how it process next moves}
+    \centering
+    \includegraphics[width=0.9\textwidth]{ACO_Whiteboard.jpg}
+    \label{fig:acowhiteboard}
+    
 \end{figure}
 
 
