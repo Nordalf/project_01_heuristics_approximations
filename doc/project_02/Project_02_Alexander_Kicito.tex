@@ -441,12 +441,12 @@ it has to perform, which is \textit{n}
 
 \newpage
 \section{Discussion}
+
+
 Metaheuristics takes longer to execute, since they are not stopping until certain criteria is fulfilled. This criteria can be hard to reach and therefore, 
-the algorithm can be running forever. In our two metaheuristic algorithms, the stopping criteria is the timespan of the running process. When the algorithms have been 
-running for the set time, the process\' is stopped. \\
-Our Simulated Annealing algorithm does run for a long time with an exponential complexity. From the Table \ref{table:cost}, we are getting close in some cases, 
-but our initial from our heuristic project part 1 Cluster algorithm, where it grows routes from furthest point from depot and using nearest addition heuristic approach to form a tour, is still doing better in most cases. We concluded that allowing more possibility on developing neighbor selection is not benefit total cost much. Ideas on improvement for neighbor selection is to create smarter algorithm to pick neighbor such as select exchange neighbors based on it's proximity could allow Simulated Annealing discover better local optimum sooner in each iteration. Compared to our not-finished, and bad performed, Ant Colony Optimization algorithm, 
-the Simulated Annealing algorithm is performing better.
+the algorithm can be running forever. In our two metaheuristic algorithms, the stopping criteria is the timespan of the running process. When the algorithms have been running for the set time, the process\' is stopped. \\
+Our Simulated Annealing algorithm does run for a long time with an exponential complexity. Looking at our Table~\ref{table:cost}, we are getting close reaching the cost of the cluster heuristic - picks furthest point from the depot and uses the nearest addition heuristic approach to generate routes in clusters to form a tour - from our first project, is still doing better in most cases. We concluded, allowing more possibilities on developing neighbor selection, is not benefitting the the total cost a lot. An idea to improve the neighbor selection is to create a smarter algorithm to pick a neighbor, such as selecting and exchanging neighbors based on it's proximity. This could allow the Simulated Annealing to be better in obtaining a local optimum earlier in each iteration. 
+Since we did not get the ACO algorithm to work properly, the only comparison we were able to make, was between the first instance: A-n32-k05. Here, the ACO was finding a cost around 1800-1900, where the SA - from Table~\ref{table:cost} - found costs at 980. This makes a great win for the SA in our case.
 
 
 \bibliographystyle{plain}
