@@ -116,15 +116,167 @@ by heating and cooling it. The inspiration can be used in computer science as we
 to the problem and not "care" about the initial solutions. The better steps we are taking, and better solutions we are finding, the more careful we are going to be in finding 
 a solution. In the beginning we allow random and bad steps to be performed, while later, we make better calculations.
 \newline
-In our algorithm we have ... KIE DO SOMETHING HERE
-\newline
+We have developed an algorithm to solve CVRP using Simulated Annealing technique by relating CVRP with existed problems i.e. 
+Bin packing problem and Knapsack problem. Using this approach, we can guarantee maximum amount of vehicles necessary required with approximation analysis on 
+bin packing hueristic algorithm. In this demonstration, we use well studied 
+algorithm First-Fit-Decreasing which is guaranteed to use no more than $\frac{11}{9}\textsc{OPT} + 1$ number of required vehicles\cite{FFD}. 
+With combination of simple Traveling Salesman Problem's local search algorithm, 2-opt, we are able create the initial feasible solution as described 
+in~\ref{alg:alg_ffd}. Next step of Simulated Annealing involved creating new feasible solution by altering current solution. 
+Which in CVRP case, is to perform points exchange action between routes. In order to allow as much possibility of exchanges as it could without breaking 
+capacity constrain, we choose simple algorithm to find exchanges possibility based on Knapsack problem~\ref{alg:alg_knapsackcom}.
 
-\begin{algorithm}[!ht]
-	\caption{Metaheuristic - Simulated Annealing}\label{euclid}
-	\begin{algorithmic}[1]
-	
+\begin{algorithm}[!h]
+	\caption{Simulated annealing with First-Fit-Decreasing and Knapsack combination}
+	\label{alg:alg_sa}
+
+    \begin{algorithmic}[1]
+    \Require{$customers$: List of customer coordinate with it's capacity}
+
+	\Require{$route\_cap(route)$: returns capacity of route} 
+	\Require{$route\_cost(route)$: returns capacity of route} 
+	\Require{$tsp\_local\_search(route)$: performs travelling salesman local search and returns improved route}
+	\Require{$is\_accept(best\_cost, cost, temp)$: an acceptance criterion function returns boolean based on Metopolis condition}
+
+	\Require{$max\_cap$: Maximum capacity for each route} 
+	\Require{$depot$: Depot point} 
+
+	\Function{simulated\_annealing\_ffd}{{$customers, temp, alpha, no\_improve\_limits$}}
+        \State $routes \gets \textsc{cvrp\_first\_fit\_decreasing}(customers,depot)$
+        \State $best\_cost \gets$ total cost of $routes$
+        \State $best\_routes \gets routes$
+        \State $current\_cost \gets best\_cost$
+        \State $current\_routes \gets routes$
+        \State $curr\_no\_improve\_trying \gets 0$
+        \While{True}
+            \If{$curr\_no\_improve\_trying == no\_improve\_limits$}
+            break
+            \EndIf
+            \State $origin\_route\_id, target\_route\_id \gets$ randomly pick 2 distinct index of $routes$
+            \State $origin\_route\_point \gets$ randomly pick element from $route[origin\_route\_id]$
+            
+            \State $upper\_bound, lower\_bound \gets$ maximum and minimum capacity such that solution still feasible after exchange action
+
+            % \State $upper\_bound \gets max\_cap - (route\_cap(routes[origin\_route\_id] - origin\_route\_point.capacity))$
+
+            % \State $lower\_bound \gets route\_cap(routes[target\_route\_id]) - (max\_cap - origin\_route\_point.capacity)$
+
+            \State $target\_neighbors\_set \gets \textsc{knapsack\_combination}($
+            \Statex $route[target\_route\_id], lower\_bound, upper\_bound)$
+
+            \If{$len(target\_neighbors\_set) == 0$}
+                continue
+            \EndIf
+
+            \State $target\_neighbors \gets$ randomly pick an element from $target\_neighbors\_set$
+
+            \State $new\_route\_i, new\_route\_i \gets$ exchange neighbors between two route and assign to new variables
+
+            \State $new\_route\_i \gets tsp\_local\_search(new\_route\_i)$  
+            \State $new\_route\_j \gets tsp\_local\_search(new\_route\_j)$
+
+            \State $old\_tours\_cost \gets route\_cost(route[origin\_route\_id]) + route\_cost(route[target\_route\_id])$
+            \State $new\_tours\_cost \gets route\_cost(new\_route\_i) + route\_cost(new\_route\_j)$
+
+            \State $new\_cost \gets current\_cost - old\_tours\_cost + new\_tours\_cost$
+            
+            \If{$is\_accept(best\_cost, new\_cost, temp)$}
+                \State update $temp$ with $alpha$
+                \State update $current\_routes$ with new routes
+                \State $curr\_no\_improve\_trying \gets 0$
+                \If{$new\_cost < best\_cost$}
+                    \State update best\_cost and best\_routes with new routes
+                \EndIf
+            \Else
+                \State $curr\_no\_improve\_trying \gets curr\_no\_improve\_trying + 1$
+            \EndIf
+        \EndWhile
+        \Return $best\_routes$
+	\EndFunction
 	\end{algorithmic}
 \end{algorithm}
+
+
+\begin{algorithm}[!h]
+	\caption{First-Fit-Decreasing for CVRP}
+	\label{alg:alg_ffd}
+	
+    \begin{algorithmic}[1]
+    \Require{$customers$: List of customer coordinate with it's capacity}
+	\Require{$tsp\_local\_search(route)$: performs travelling salesman local search and returns improved route}
+	\Require{$max\_cap$: Maximum capacity for each route} 
+	\Require{$depot$: Depot point} 
+	\Require{$route\_cost(route)$: returns capacity of route} 
+    
+    \Ensure{$routes$: solution route}
+    \Function{cvrp\_first\_fit\_decreasing}{{$customers$}}
+        \State $sorted\_capacity\_points \gets$ sort customer points by it's capacity
+        \State $routes \gets []$
+        \State add a route with $depot$ to $routes$
+        \ForAll{$point$ in $sorted\_capacity\_points$}
+        \State $is\_fit \gets False$
+            \ForAll{$route$ in $routes$}
+            \If{$route\_cost(route) + point.capacity \leq max\_cap$}
+                \State add $point$ to $route$
+                \State $is\_fit \gets True$
+                \State break
+            \EndIf
+            \EndFor
+
+            \If{$!is\_fit$}
+                \State add new route with $depot$ and $point$ to $routes$
+            \EndIf
+        \EndFor
+
+        \ForAll{$route$ in $routes$}
+            \State $route \gets tsp\_local\_search(route)$
+        \EndFor
+        \Return $routes$
+	\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}[!h]
+	\caption{Knapsack Combination}
+	\label{alg:alg_knapsackcom}
+
+    \begin{algorithmic}[1]
+    \Require{$customers$: List of customer coordinate with it's capacity}
+	\Require{$max\_cap$: Maximum capacity for each route} 
+	\Require{$depot$: Depot point}
+	\Require{$max\_points\_amt$: Number of maximum combination points}
+	\Require{$route\_cap(route)$: returns capacity of route} 
+    
+    \Ensure{$combination\_set$: possible combination of points in route s.t. their capacity not exceeds $max\_cap$}
+    \Function{knapsack\_combination}{$route, lower\_bound, upper\_bound$}
+        
+        \State $points \gets$ randomly pick $max\_points\_amt$ points from $route$ but $depot$
+        \State $combination\_set \gets$ []
+
+        \Function{knapsack\_combination\_recur}{{$current\_point\_id, current\_capacity, knapsack$}}
+            \If{$current\_point\_id == len(points)$}
+                \If{$route\_cap(knapsack) > lower\_bound$}
+                    \State add knapsack to $combination\_set$
+                \EndIf
+            \EndIf
+            \State $knapsack\_combination\_recur($
+            \Statex $current\_point\_id + 1, current\_capacity, knapsack)$
+
+            \If{$current\_cap + points[current\_point\_id] \leq max\_cap$}
+                \State add $points[current\_point\_id]$ to $knapsack$
+                \State $current\_cap \gets points[current\_point\_id].capacity$
+                \State $knapsack\_combination\_recur($
+                \Statex $current\_point\_id + 1, current\_capacity, knapsack)$
+
+            \EndIf
+        \EndFunction
+        \State $knapsack\_combination(0,0,[])$
+        \State \Return $combination\_set$
+	\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
+\include{perf_table}
 
 \newpage
 \section{Ant Colony Optimization}
@@ -181,39 +333,97 @@ In Figure \ref{fig:acowhiteboard} a drawing has been created to visualize the id
 
 \end{figure}
 
-The pseudocode for the algorithm is described as followed: 
+The complexity of the algorithm is $O(n)$ after initializing the pheromone matrix, due to the amount of checks from the current point 
+it has to perform, which is \textit{n}\\
 
-\begin{algorithm}[!ht]
-	\caption{Metaheuristic - Ant Colony Optimization}
-    \begin{algorithmic}[1]
-        \Function{algorithm}{}
-            \State $\var{capacity} \gets 0$
-            \State $\var{alpha} \gets \text{A random number}$
-            \State $\var{beta} \gets \text{A random number greater than alpha}$
-            \State $\var{evaporation} \gets \text{Some small number}$
-            \State $\var{pheromone\_matrix} \gets \text{Contains every pheromone for each pair}$
-            \State $\var{sum\_of\_all\_pheromone} \gets {The summation of the pheromone\_matrix}$
-            {Setup Intial Pheromone}
-            \For{${first\_point} \gets 0$ to ${length of data}$}
-                \For{${second\_point} \gets 0$ to ${length of data}$}
-                    \If{${first\_point}$ \neq ${second\_point}$}
-                        \State {\var{pheromone(first, second)} \gets 1 / distance}
-                    \EndIf
-                \EndFor
-            \EndFor
+The psuedocode of the algorithm can be found in the appendices.
 
-            
-        \EndFunction
-	\end{algorithmic}
-\end{algorithm}
+\section{Discussion}
+Metaheuristics takes longer to execute, since they are not stopping until certain criteria is fulfilled. This criteria can be hard to reach and therefore, 
+the algorithm can be running forever. In our two metaheuristic algorithms, the stopping criteria is the timespan of the running process. When the algorithms have been 
+running for the set time, the process\' is stopped. \\
+Our Simulated Annealing algorithm does run for a long time, but finds good solutions
 
-Giving us the next bloxpawdaw
-
-\section{\\ BOXPLOT FIGURES}
+\section{\\ FIGURES}
 
 \newpage
+
+\bibliographystyle{plain}
+\bibliography{references}
+
 \begin{appendices}
 
+    \section{Metaheuristic - Ant Colony Optimization - Pseudocode}
+    \begin{algorithm}[!ht]
+        \caption{Metaheuristic - Ant Colony Optimization}
+        \begin{algorithmic}[1]
+            \State $\var{global\_best\_route} \gets \text{empty route/array}$
+            \Function{algorithm}{}
+                \While{A maximum number of iterations or a time limit has passed}
+                    \State $\var{local\_best\_route} \gets \text{empty route/array}$
+                    \State $\var{current\_route} \gets \text{empty route/array}$
+                    \State $\var{capacity} \gets 0$
+                    \State $\var{alpha} \gets \text{A random number}$
+                    \State $\var{beta} \gets \text{A random number greater than alpha}$
+                    \State $\var{evaporation} \gets \text{Some small number}$
+                    \State $\var{pheromone\_matrix} \gets \text{Contains every pheromone for each pair}$
+                    \State $\var{sum\_of\_all\_pheromone} \gets \text{The summation of the pheromone\_matrix}$
+                    
+                    \For{${first\_point} \gets 0$ to \text{length of data}}
+                        \For{${second\_point} \gets 0$ to \text{length of data}}
+                            \If{${first\_point} \neq {second\_point}$}
+                                \State $\var{pheromone\_matrix(first, second)} \gets 1 / distance}$
+                                \State $\var{sum\_of\_all\_pheromone} \gets \text{append calculated pheromone to the sum}$
+                            \EndIf
+                        \EndFor
+                    \EndFor
+    
+                    \State Pick a random point for the list of points. 
+                    \State Mark it as visited
+                    \State Append it to the routes
+                    \State Keep storage of the previous score
+    
+                    \While{${point} \neq \text{visited in list}$}
+                        \For{key in \text{pheromone\_matrix}}
+                            \State Calculate and store the Score-equation
+                            \State Calculate and store the Probability-equation
+                            \If{the new score \lt previous score \&\& key is not visited}
+                                \State Set the key of the request to the point moved to
+    
+                            \EndIf
+                        \EndFor
+    
+                        \State Append Newpheromone-equation to the trail of the point moved to
+    
+                        \If{Capacity of picked point \leq Capacity Constraint}
+    
+                            \State Capacity capacity of request
+                            \State Append picked point to \var{current\_route}
+                            \State Mark picked point as visited
+                            \State Set picked point to the current point
+                            \State Set previous score to 0
+    
+                        \Else
+                            \State Reset \var{current\_route} and append picked point to new route
+                            \State Mark point as visited
+                            \State{$\var{capacity} \gets 0$}
+                            \State{$\var{capacity} \gets capacity of picked point$}
+                            \State Set previous score to 0
+                        \EndIf
+                    \EndWhile
+                    \If{\var{current\_route} is better than \var{local\_best\_route}}
+                        \State $\var{local\_best\_route} \gets \var{current\_route}$    
+                    \EndIf
+    
+                    \If{\var{local\_best\_route} is better than \var{global\_best\_route}}
+                        \State $\var{global\_best\_route} \gets \var{local\_best\_route}$  
+                    \EndIf
+    
+                    \State loop through \var{pheromone\_matrix} and evaporate every pheromone trail by a small percentage
+                \EndWhile
+            \EndFunction
+        \end{algorithmic}
+    \end{algorithm}
 
 \end{appendices}
 \end{document}

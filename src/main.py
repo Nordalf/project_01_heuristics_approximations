@@ -15,7 +15,7 @@ from solverLS import SolverLS
 import solverCHH
 import solverNN
 import metaFFD
-import ACO_test
+import ACO
 import utilities
 from error import TimeOutExeption
 
@@ -167,7 +167,7 @@ def main(argv):
         instance = data.Data(config.instance_file)
         # alg = solverNN.algorithm
         # alg = solverCHH.algorithm
-        alg = ACO_test.Ant().algorithm
+        alg = ACO.Ant().algorithm
         # alg = metaFFD.algorithm
         sol = solve(instance, alg, config)
         
