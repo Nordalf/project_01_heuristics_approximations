@@ -15,7 +15,7 @@ from solverLS import SolverLS
 import solverCHH
 import solverNN
 import metaFFD
-import ACO_test
+import ACO
 import utilities
 from error import TimeOutExeption
 
@@ -167,9 +167,10 @@ def main(argv):
         instance = data.Data(config.instance_file)
         # alg = solverNN.algorithm
         # alg = solverCHH.algorithm
-        alg = ACO_test.Ant().algorithm
+        alg = ACO.Ant().algorithm
         # alg = metaFFD.algorithm
         sol = solve(instance, alg, config)
+        
         if config.output_file is not None:
             if config.graphic_sol:
                 import matplotlib.pyplot as plt
@@ -177,7 +178,7 @@ def main(argv):
                 plt.rcParams.update({'font.size': 22})
                 sol.plot_routes(split=config.split_route,
                                 output_filename=config.output_file+'_sol'+'.png')
-            sol.write_to_file(config.output_file+'.sol')
+            # sol.write_to_file(config.output_file+'.sol')
             # print(instance_times_costs)
             # sol.plot_table(config.output_file+'_tbl', instance.instance_name, instance_times_costs)
         print("{} routes with total cost {:.1f}"
