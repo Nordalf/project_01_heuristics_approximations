@@ -9,6 +9,7 @@
 \graphicspath{{../images/}}
 \usepackage{parskip}
 \usepackage{fancyhdr}
+\usepackage{textgreek}
 \usepackage{vmargin}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
@@ -134,16 +135,43 @@ a trail. If they are standing in a cross-section and they have to choose, they a
 At some point in their exploration to find the best trail to obtain food, all the ants are using the same trails to get food and get back safe home. 
 \newline
 We can apply the logic of the ants in the CVRP as well. By letting the instance \- the space of which the requests are "plotted" \- be the area to find a solution, 
-we can start by sending one "ant" out to a point. From this point, we are going to calculate every probability of moving to the next point \- the one with the highest "score". 
-We can calulate the probabilty of moving by the following: 
+we can start by sending one "ant" out to a random point. This is going to be our current point. From this point, we are going to calculate every probability of moving to the next point \- the one with the highest "score". 
+We can calulate the probabilty of moving by the doing the following: 
 \newline
 First we establish the initial pheromone levels from all the points to every counter other point: \\
-
+This is stored in matrix: 
 M = \begin{bmatrix}
     0 & 0.50 & 0.20           \\[0.3em]
     0.125 & 0           & 0.60 \\[0.3em]
     1.20 & 0.355 & 0
-  \end{bmatrix}
+\end{bmatrix}
+
+We also keep track of the points being visited, so we do not keep visiting the same nodes. Then we start calculating a score for each point from the current point.
+We do this by the formular: \\
+
+
+\begin{equation}
+score = \alpha^\frac{1.0}{distance(i,j)}^\beta
+\end{equation}
+
+The \textalpha  value defines the importance of the pheromone level, where the \textbeta  value defines the importance of the distance between two points. After finding the score for 
+each point from the current point, we can calculate the probability by dividing the score by the summation of all scores: \\
+
+\begin{equation}
+prob = \frac{score}{\displaystyle\sum_{i=1}^{n} score_i}
+\end{equation}
+
+Where \textbf{n} is equivalent to the number of points. We can now append additional pheromone to the trail from the current point to the next point, 
+by dividing: 
+\begin{equation}
+    newpheromone = \frac{1}{distance(i, j)}
+\end{equation}
+
+Now we can continue with our usual CVRP properties, where we ensure the capacity of the vehicle is not breached. We continue finding points with the above 
+algorithm. \\
+After the algorithm has found a solution, we are going to run it again, with the same pheromone matrix, but with updated values, where every pheromone in the trails evaporates a small percentage before each iteration. 
+ A timer is being set, which controls for how long the algorithm runs. \\
+In Figure \ref{fig:acowhiteboard} a drawing has been created to visualize the idea of the algorithm: \\
 
 \begin{figure}[H]
 	\caption{Illustration of the ACO algorithm, showing how it can be used, and how it process next moves}
@@ -153,7 +181,33 @@ M = \begin{bmatrix}
 
 \end{figure}
 
+The pseudocode for the algorithm is described as followed: 
 
+\begin{algorithm}[!ht]
+	\caption{Metaheuristic - Ant Colony Optimization}
+    \begin{algorithmic}[1]
+        \Function{algorithm}{}
+            \State $\var{capacity} \gets 0$
+            \State $\var{alpha} \gets \text{A random number}$
+            \State $\var{beta} \gets \text{A random number greater than alpha}$
+            \State $\var{evaporation} \gets \text{Some small number}$
+            \State $\var{pheromone\_matrix} \gets \text{Contains every pheromone for each pair}$
+            \State $\var{sum\_of\_all\_pheromone} \gets {The summation of the pheromone\_matrix}$
+            {Setup Intial Pheromone}
+            \For{${first\_point} \gets 0$ to ${length of data}$}
+                \For{${second\_point} \gets 0$ to ${length of data}$}
+                    \If{${first\_point}$ \neq ${second\_point}$}
+                        \State {\var{pheromone(first, second)} \gets 1 / distance}
+                    \EndIf
+                \EndFor
+            \EndFor
+
+            
+        \EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
+Giving us the next bloxpawdaw
 
 \section{\\ BOXPLOT FIGURES}
 

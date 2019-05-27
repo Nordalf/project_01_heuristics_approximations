@@ -55,9 +55,9 @@ class MetaHeuristic:
         raise TimeOutExeption(self.solution)
 
     def construct(self, time_left):
-        # signal.CTRL_BREAK_EVENT()
+        signal.signal(signal.SIGALRM, self.timeoutHandler)
         timeout = math.ceil(time_left)
-        # signal.alarm(timeout)
+        signal.alarm(timeout)
         return self.canonical_solution()
 
     def canonical_solution(self):

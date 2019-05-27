@@ -47,7 +47,7 @@ class Ant:
     global_best = 0
     global_best_route = []
 
-    def aco(self, data, solution, max_iterations=5):
+    def aco(self, data, solution, output_file=None):
         route = [0]
         Q = data.capacity # Max Capacity
         q = 0 # Collected capacity
@@ -71,7 +71,7 @@ class Ant:
         
             
         counter = 0
-        while counter <= max_iterations:
+        while True:
             
             # Creating a map of unvisited nodes
             for i in range(1, len(data.nodes)):
@@ -122,36 +122,43 @@ class Ant:
                     del not_visited_nodes[picked_request] # Remove request from the list
                     if len(not_visited_nodes) == 0: # Since the while loop is going to end after this, we are adding the route to all the routes
                         route += [picked_request]
-                        solution.routes += [route+[0]]
+                        local_best_route += [route+[0]]
                         route = [0]
                     current_request = picked_request # New current request
                     route += [current_request]
                     previous_score = 0
                 else:
                     current_request = picked_request # Starting point for next
-                    solution.routes += [route+[0]]
+                    local_best_route += [route+[0]]
                     route = [0]
                     route += [current_request]
                     del not_visited_nodes[current_request] # Remove request from the list
                     q = data.nodes[current_request]["rq"]
                     previous_score = 0
-            # print(solution.routes)
+
+            solution.routes = local_best_route
             cost = solution.cost()
+            
             if local_best == 0:
                 local_best = cost
                 self.global_best = cost
             if cost < local_best:
                 local_best = cost
-                local_best_route = solution.routes
+                # local_best_route = solution.routes
                 print("New Local Best Route")
                 if local_best < self.global_best:
                     self.global_best = local_best
-                    self.global_best_route = solution.routes
-                    print("New Global Best Route")
+                    self.global_best_route = local_best_route
+                    solution.routes = self.global_best_route
+                    print("New Global Best Route", solution.cost())
+                    if output_file is not None:
+                        assert solution.valid_solution()
+                        print("Hre")
+                        solution.write_to_file(output_file+'.sol')
             # Reset the route
             route = []
             # Reset the solution routes
-            solution.routes = []
+            local_best_route = []
             # Evaporate by .05 % for every pheromone trail
             for i in range(1, len(self.pheromone_map)):
                 for j in range(1, len(self.pheromone_map[i])):
@@ -167,7 +174,7 @@ class Ant:
         
     def algorithm(self, data, solution, seed=None, output_file=None):
         random.seed(seed)
-        solution = self.aco(data, solution, 5000 )
+        solution = self.aco(data, solution, output_file=output_file)
         # local_best = solution.cost()
         
         print("Cost", self.global_best)
