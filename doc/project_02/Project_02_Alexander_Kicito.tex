@@ -96,7 +96,7 @@ This project shows metaheuristic algorithms, resolving the Capacitated Vehicle R
 the solution part. For heuristics, you are trying your best to find a solution, even though it is not optimal. The algorithm is adapted to the problem
 in such a greedy approach, it can get stuck in a local optimum. This is fine since it is the idea of heuristics: "just solve the problem". 
 \newline
-Metaheuristics are less greedy and tends to be more problem independent. They accept temporary solutions and allow "bad" steps as an attempt to get
+Metaheuristics are less greedy and tend to be more problem independent. They accept temporary solutions and allow "bad" steps as an attempt to get
 a better solution. You have a local- and global optimum to keep track of the best solution found. You can say metaheuristics are exploiting
 heuristics to avoid getting trapped. 
 \newline
@@ -116,7 +116,7 @@ by heating and cooling it. The inspiration can be used in computer science as we
 to the problem and not "care" about the initial solutions. The better steps we are taking, and better solutions we are finding, the more careful we are going to be in finding 
 a solution. In the beginning we allow random and bad steps to be performed, while later, we make better calculations.
 \newline
-We have developed an algorithm to solve CVRP using Simulated Annealing technique by relating CVRP with existed problems i.e. Bin packing problem and Knapsack problem. Using this approach, we can guarantee maximum amount of vehicles necessary required with approximation analysis on bin packing hueristic algorithm. In this demonstration, we use well studied  algorithm First-Fit-Decreasing which is guaranteed to use no more than $\frac{11}{9}\textsc{OPT} + 1$ number of required vehicles\cite{FFD}. With combination of simple Traveling Salesman Problem's local search algorithm, 2-opt, we are able create the initial feasible solution. Next step of Simulated Annealing involved creating new feasible solution by altering current solution. Which in CVRP case, is to perform points exchange action between routes. In order to allow as much possibility of exchanges as it could without breaking capacity constrain, we choose simple algorithm to find exchanges possibility based on Knapsack problem. Our implementation of acceptance criterion is based on Metropolis condition which accept new solution by using probability $p = \exp[−\frac{new\_cost − best\_cost}{temp}]$, this leads to $p = 1$ when $new\_cost < best\_cost$ otherwise $p = [0,1)$. We use geometric cooling scheme in order to update temperature every iteration the algorithm accepts new solution by multiply temperature variables with $alpha$ where  $alpha=(0,1)$. This makes $p$ have lower probability to accept worsen solution after later iteration. All algorithms is described as following.
+We have developed an algorithm to solve CVRP using Simulated Annealing technique by relating CVRP with existed problems i.e. Bin packing problem and Knapsack problem. Using this approach, we can guarantee maximum amount of vehicles necessary required with approximation analysis on bin packing hueristic algorithm. In this demonstration, we use well studied  algorithm First-Fit-Decreasing which is guaranteed to use no more than $\frac{11}{9}\textsc{OPT} + 1$ number of required vehicles\cite{FFD}. With combination of simple Traveling Salesman Problem's local search algorithm, 2-opt, we are able create the initial feasible solution. Next step of Simulated Annealing involved creating new feasible solution by altering current solution. Which in CVRP case, is to perform points exchange action between routes. In order to allow as much possibility of exchanges as it could without breaking capacity constrain, we choose simple algorithm to find exchanges possibility based on Knapsack problem. Our implementation of acceptance criterion is based on Metropolis condition which accept new solution by using probability $p = \exp[−\frac{new\_cost − best\_cost}{temp}]$, this leads to $p = 1$ when $new\_cost < best\_cost$ otherwise $p = [0,1)$. We use geometric cooling scheme in order to update temperature every iteration the algorithm accepts new solution by multiply temperature variables with $alpha$ where  $alpha=(0,1)$. This makes $p$ have lower probability to accept worsen solution after later iteration. All algorithms is described below in this paper.
 
 \begin{algorithm}[!h]
     \footnotesize
@@ -445,9 +445,27 @@ it has to perform, which is \textit{n}
 
 Metaheuristics takes longer to execute, since they are not stopping until certain criteria is fulfilled. This criteria can be hard to reach and therefore, 
 the algorithm can be running forever. In our two metaheuristic algorithms, the stopping criteria is the timespan of the running process. When the algorithms have been running for the set time, the process\' is stopped. \\
-Our Simulated Annealing algorithm does run for a long time with an exponential complexity. Looking at our Table~\ref{table:cost}, we are getting close reaching the cost of the cluster heuristic - picks furthest point from the depot and uses the nearest addition heuristic approach to generate routes in clusters to form a tour - from our first project, is still doing better in most cases. We concluded, allowing more possibilities on developing neighbor selection, is not benefitting the the total cost a lot. An idea to improve the neighbor selection is to create a smarter algorithm to pick a neighbor, such as selecting and exchanging neighbors based on it's proximity. This could allow the Simulated Annealing to be better in obtaining a local optimum earlier in each iteration. 
+Our Simulated Annealing algorithm does run for a long time with an exponential complexity. Looking at our Table~\ref{table:cost}, we comparing solution produced by our first project cluster heuristic - picks furthest point from the depot and uses the nearest addition heuristic approach to generate routes in clusters to form a tour - with Simulated Annealing metaheuristic algorithm. For Simulated Annealing, we earn benefit from using $\textsc{First-Fit-Decreasing}$ since our required vehicles for Simulated Annealing solution is less than our previous algorithm in most case but some of Golden instances which caused by the distribution of customer point. Cost-wise, our the heuristic algorithm still out perform Simulated Annealing in most cases. We concluded, allowing more possibilities on developing neighbor selection, is not benefitting the the total cost much. An idea to improve the neighbor selection is to create a smarter algorithm to pick a neighbor, such as selecting and exchanging neighbors based on it's proximity. This could allow the Simulated Annealing to be better in obtaining a local optimum earlier in each iteration. 
 Since we did not get the ACO algorithm to work properly, the only comparison we were able to make, was between the first instance: A-n32-k05. Here, the ACO was finding a cost around 1800-1900, where the SA - from Table~\ref{table:cost} - found costs at 980. This makes a great win for the SA in our case.
 
+\section{Contribution}
+It is always a pleasure to work together. We are both enthusiastic about the work and challenges ourselves with stuff, we might not be able to do, but we learn a lot. 
+The workload has been splitted between us as close to 50/50 as we could and our communication has been friendly and nice. 
+
+Narongrit Unwerawattana
+\begin{itemize}
+	\item Development of Simulated Annealing
+	\item Performance Table compared to our Heuristic algorithm
+	\item Performance Graph
+\end{itemize}
+Alexander Lerche Falk
+\begin{itemize}
+	\item Development of Ant Colony Optimization
+\end{itemize}
+both
+\begin{itemize}
+	\item Writing report
+\end{itemize}
 
 \bibliographystyle{plain}
 \bibliography{references}
