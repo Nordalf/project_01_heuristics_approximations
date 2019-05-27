@@ -119,7 +119,7 @@ a solution. In the beginning we allow random and bad steps to be performed, whil
 We have developed an algorithm to solve CVRP using Simulated Annealing technique by relating CVRP with existed problems i.e. Bin packing problem and Knapsack problem. Using this approach, we can guarantee maximum amount of vehicles necessary required with approximation analysis on bin packing hueristic algorithm. In this demonstration, we use well studied  algorithm First-Fit-Decreasing which is guaranteed to use no more than $\frac{11}{9}\textsc{OPT} + 1$ number of required vehicles\cite{FFD}. With combination of simple Traveling Salesman Problem's local search algorithm, 2-opt, we are able create the initial feasible solution. Next step of Simulated Annealing involved creating new feasible solution by altering current solution. Which in CVRP case, is to perform points exchange action between routes. In order to allow as much possibility of exchanges as it could without breaking capacity constrain, we choose simple algorithm to find exchanges possibility based on Knapsack problem. Our implementation of acceptance criterion is based on Metropolis condition which accept new solution by using probability $p = \exp[−\frac{new\_cost − best\_cost}{temp}]$, this leads to $p = 1$ when $new\_cost < best\_cost$ otherwise $p = [0,1)$. We use geometric cooling scheme in order to update temperature every iteration the algorithm accepts new solution by multiply temperature variables with $alpha$ where  $alpha=(0,1)$. This makes $p$ have lower probability to accept worsen solution after later iteration. All algorithms is described as following.
 
 \begin{algorithm}[!h]
-    \small
+    \footnotesize
     \caption{Simulated annealing with First-Fit-Decreasing and Knapsack combination}
     \label{alg:alg_sa}
     
@@ -162,7 +162,7 @@ We have developed an algorithm to solve CVRP using Simulated Annealing technique
 \end{algorithm}
 
 \begin{algorithm}[!h]
-    \small
+    \footnotesize
     \caption{First-Fit-Decreasing for CVRP}
     \label{alg:alg_ffd}
     
@@ -202,7 +202,7 @@ We have developed an algorithm to solve CVRP using Simulated Annealing technique
 \end{algorithm}
 
 \begin{algorithm}[!h]
-    \small
+    \footnotesize
     \caption{Neighbours selection for SA}
     \label{alg:alg_ffd}
     \begin{algorithmic}[1]
@@ -247,7 +247,7 @@ We have developed an algorithm to solve CVRP using Simulated Annealing technique
 
 
 \begin{algorithm}[!h]
-    \small
+    \footnotesize
     \caption{Knapsack Combination}
     \label{alg:alg_knapsackcom}
     
@@ -261,7 +261,12 @@ We have developed an algorithm to solve CVRP using Simulated Annealing technique
         \Ensure{$combination\_set$: set of candidates combination of points in $route$}
         \Function{knapsack\_combination}{$route, lower\_bound, upper\_bound$}
         
+        \State $points$
+        \If{$len(route) < max\_points\_amt$}
+        \State $points \gets$ randomly pick $len(route)$ points from $route$ but $depot$
+        \Else
         \State $points \gets$ randomly pick $max\_points\_amt$ points from $route$ but $depot$
+        \EndIf
         \State $combination\_set \gets$ []
         
         \Function{knapsack\_combination\_recur}{{$current\_point\_id, current\_capacity, knapsack$}}
@@ -292,7 +297,7 @@ We have developed an algorithm to solve CVRP using Simulated Annealing technique
 
 By relating CVRP to other existed problem, we are able to come up with a simple algorithm and use existed technique, Simulated Annealing, to improve the solution. We first analyzing our algorithm to construct our initial routes. Using $\textsc{First-Fit-Decreasing}$ to assign group customer points for a vehicle only have runtime complexity of $O(nlogn)$ but in order to decide customer point sequences for each route, we rely on local search algorithm for traveling salesman problem which dominates runtime complexity of our bin packing algorithm. Using simple 2-opt local search algorithm arrange customer point sequences for each vehicle route yields runtime complexity of $O(n^2)$.
 
-Another key task of Simulated Annealing is the neighbor selection procedure. Our attempt is to find largest possibility of exchanging customer point between routes. The problem is risen when given one customer point chosen by uniform distribution probability, how can we decide other candidate to make exchange action and such candidate should not leads to infeasible solution. Introducing a simple algorithm to find possibility of packing customer point into one set based on brute force algorithm for Knapsack problem, which explore for every customer points either to include in neighbor exchange candidate or not, allows us to find a list of feasible candidates to make exchange between routes. But tradeoff of this algorithm is the runtime complexity, which is $O(2^n)$ where $n$ is number of customer points in candidate route. In order to keep runtime of each Simulated Annealing iteration small, we introduce a user-defined variable $max\_points\_amt$ which an algorithm will use to choose number of customer points in candidate route and proceed the algorithm. This indeed reduces the number of possibility on selecting exchange neighbors candidates but in an instance where it consist of many small capacity point, without limiting such customer point might leads to long runtime for each neighbor selection process. We conclude that for each iteration of our Simulated Annealing the runtime complexity is in $O(2^n)$ where $n$ is maximum number of points allowed to be exchange.
+Another key task of Simulated Annealing is the neighbor selection procedure. Our attempt is to find largest possibility of exchanging customer point between routes. The problem is risen when given one customer point chosen by uniform distribution probability, how can we decide other candidate to make exchange action and such candidate should not leads to infeasible solution. Introducing a simple algorithm to find possibility of packing customer point into one set based on brute force algorithm for Knapsack problem, which explore for every customer points either to include in neighbor exchange candidate or not, allows us to find a list of feasible candidates to make exchange between routes. But tradeoff of this algorithm is the runtime complexity, which is $O(2^n)$ where $n$ is number of customer points in candidate route. In order to keep runtime of each Simulated Annealing iteration footnotesize, we introduce a user-defined variable $max\_points\_amt$ which an algorithm will use to choose number of customer points in candidate route and proceed the algorithm. This indeed reduces the number of possibility on selecting exchange neighbors candidates but in an instance where it consist of many footnotesize capacity point, without limiting such customer point might leads to long runtime for each neighbor selection process. We conclude that for each iteration of our Simulated Annealing the runtime complexity is in $O(2^n)$ where $n$ is maximum number of points allowed to be exchange.
 
 \begin{figure}[!h]
 	\caption{Illustration of the cost per each acceptance iteration of Simulated Annealing for 3 Simulated Annealing schedule on instance A-n32-k05}
@@ -348,108 +353,103 @@ by dividing:
 
 Now we can continue with our usual CVRP properties, where we ensure the capacity of the vehicle is not breached. We continue finding points with the above 
 algorithm. \\
-After the algorithm has found a solution, we are going to run it again, with the same pheromone matrix, but with updated values, where every pheromone in the trails evaporates a small percentage before each iteration. 
+After the algorithm has found a solution, we are going to run it again, with the same pheromone matrix, but with updated values, where every pheromone in the trails evaporates a footnotesize percentage before each iteration. 
  A timer is being set, which controls for how long the algorithm runs. \\
 In Figure \ref{fig:acowhiteboard} a drawing has been created to visualize the idea of the algorithm: \\
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\caption{Illustration of the ACO algorithm, showing how it can be used, and how it process next moves}
 	\centering
 	\includegraphics[width=0.9\textwidth]{ACO_Whiteboard.jpg}
 	\label{fig:acowhiteboard}
-
 \end{figure}
 
 The complexity of the algorithm is $O(n)$ after initializing the pheromone matrix, due to the amount of checks from the current point 
-it has to perform, which is \textit{n}\\
+it has to perform, which is \textit{n}
 
-The psuedocode of the algorithm can be found in the appendices.
+\newpage
+\begin{algorithm}[!ht]
+    
+    \footnotesize
 
+    \caption{Metaheuristic - Ant Colony Optimization}
+    \begin{algorithmic}[1]
+        \State $\var{max\_iteration} \gets \text{number of iteration}$
+        \State $\var{i} \gets \text{0}$
+        \State $\var{global\_best\_route} \gets \text{empty route/array}$
+        \While{$\var{i} < \var{max\_iteration}$ or a time limit is not reached}
+            \State $\var{local\_best\_route} \gets \text{empty route/array}$
+            \State $\var{current\_route} \gets \text{empty route/array}$
+            \State $\var{capacity} \gets 0$
+            \State $\var{alpha} \gets \text{A random number}$
+            \State $\var{beta} \gets \text{A random number greater than alpha}$
+            \State $\var{evaporation} \gets \text{Some footnotesize number}$
+            \State $\var{pheromone\_matrix} \gets \text{Contains every pheromone for each pair}$
+            \State $\var{sum\_of\_all\_pheromone} \gets \text{The summation of the pheromone\_matrix}$
+            \State $\var{i++}$
+            \For{${first\_point} \gets 0$ to $\text{length of data}$}
+                \For{${second\_point} \gets 0$ to $\text{length of data}$}
+                    \If{${first\_point} \neq {second\_point}$}
+                        \State $\var{pheromone\_matrix(first, second)} \gets 1 / distance$
+                        \State $\var{sum\_of\_all\_pheromone} \gets \text{append calculated pheromone to the sum}$
+                    \EndIf
+                \EndFor
+            \EndFor
+
+            \State Pick a random point for the list of points and mark it as visited
+            \State Append it to the routes
+            \State Keep storage of the previous score
+
+            \While{${point} \neq \text{visited in list}$}
+                \For{key in \text{pheromone\_matrix}}
+                    \State Calculate and store the Score-equation
+                    \State Calculate and store the Probability-equation
+                    \If{the new score < previous score \&\& key is not visited}
+                        \State Set the key of the request to the point moved to
+
+                    \EndIf
+                \EndFor
+
+                \State Append Newpheromone-equation to the trail of the point moved to
+
+                \If{Capacity of picked point $\leq$ Capacity Constraint}
+                    \State Capacity capacity of request
+                    \State Append picked point to \var{current\_route}
+                    \State Mark picked point as visited
+                    \State Set picked point to the current point
+                    \State Set previous score to 0
+
+                \Else
+                    \State Reset \var{current\_route} and append picked point to new route
+                    \State Mark point as visited
+                    \State{$\var{capacity} \gets \text{capacity\ of\ picked\ point}$}
+                    \State Set previous score to 0
+                \EndIf
+            \EndWhile
+            \If{\var{current\_route} is better than \var{local\_best\_route}}
+                \State $\var{local\_best\_route} \gets \var{current\_route}$    
+            \EndIf
+
+            \If{\var{local\_best\_route} is better than \var{global\_best\_route}}
+                \State $\var{global\_best\_route} \gets \var{local\_best\_route}$  
+            \EndIf
+
+            \State loop through \var{pheromone\_matrix} and evaporate every pheromone trail by a footnotesize percentage
+        \EndWhile
+    \end{algorithmic}
+\end{algorithm}
+
+\newpage
 \section{Discussion}
 Metaheuristics takes longer to execute, since they are not stopping until certain criteria is fulfilled. This criteria can be hard to reach and therefore, 
 the algorithm can be running forever. In our two metaheuristic algorithms, the stopping criteria is the timespan of the running process. When the algorithms have been 
 running for the set time, the process\' is stopped. \\
-Our Simulated Annealing algorithm does run for a long time, but finds good solutions
+Our Simulated Annealing algorithm does run for a long time with an exponential complexity. From the Table \ref{table:cost}, we are getting close in some cases, 
+but our initial from our heuristic project part 1 Cluster algorithm(CHH), where it grows routes from furthest point from depot and using nearest addition heuristic approach to form a tour, is still doing better in most cases. We concluded that allowing more possibility on developing neighbor selection is not benefit total cost much. Ideas on improvement for neighbor selection is to create smarter algorithm to pick neighbor such as select exchange neighbors based on it's proximity could allow Simulated Annealing discover better local optimum sooner in each iteration. Compared to our not-finished, and bad performed, Ant Colony Optimization algorithm, 
+the Simulated Annealing algorithm is performing better.
 
-\section{\\ FIGURES}
-
-\newpage
 
 \bibliographystyle{plain}
 \bibliography{references}
 
-\begin{appendices}
-
-    \section{Metaheuristic - Ant Colony Optimization - Pseudocode}
-    \begin{algorithm}[!ht]
-        \caption{Metaheuristic - Ant Colony Optimization}
-        \begin{algorithmic}[1]
-            \State $\var{global\_best\_route} \gets \text{empty route/array}$
-            \Function{algorithm}{}
-                \While{A maximum number of iterations or a time limit has passed}
-                    \State $\var{local\_best\_route} \gets \text{empty route/array}$
-                    \State $\var{current\_route} \gets \text{empty route/array}$
-                    \State $\var{capacity} \gets 0$
-                    \State $\var{alpha} \gets \text{A random number}$
-                    \State $\var{beta} \gets \text{A random number greater than alpha}$
-                    \State $\var{evaporation} \gets \text{Some small number}$
-                    \State $\var{pheromone\_matrix} \gets \text{Contains every pheromone for each pair}$
-                    \State $\var{sum\_of\_all\_pheromone} \gets \text{The summation of the pheromone\_matrix}$
-                    
-                    \For{${first\_point} \gets 0$ to $\text{length of data}$}
-                        \For{${second\_point} \gets 0$ to $\text{length of data}$}
-                            \If{${first\_point} \neq {second\_point}$}
-                                \State $\var{pheromone\_matrix(first, second)} \gets 1 / distance$
-                                \State $\var{sum\_of\_all\_pheromone} \gets \text{append calculated pheromone to the sum}$
-                            \EndIf
-                        \EndFor
-                    \EndFor
-    
-                    \State Pick a random point for the list of points. 
-                    \State Mark it as visited
-                    \State Append it to the routes
-                    \State Keep storage of the previous score
-    
-                    \While{${point} \neq \text{visited in list}$}
-                        \For{key in \text{pheromone\_matrix}}
-                            \State Calculate and store the Score-equation
-                            \State Calculate and store the Probability-equation
-                            \If{the new score < previous score \&\& key is not visited}
-                                \State Set the key of the request to the point moved to
-    
-                            \EndIf
-                        \EndFor
-    
-                        \State Append Newpheromone-equation to the trail of the point moved to
-    
-                        \If{Capacity of picked point $\leq$ Capacity Constraint}
-                            \State Capacity capacity of request
-                            \State Append picked point to \var{current\_route}
-                            \State Mark picked point as visited
-                            \State Set picked point to the current point
-                            \State Set previous score to 0
-    
-                        \Else
-                            \State Reset \var{current\_route} and append picked point to new route
-                            \State Mark point as visited
-                            \State{$\var{capacity} \gets 0$}
-                            \State{$\var{capacity} \gets capacity of picked point$}
-                            \State Set previous score to 0
-                        \EndIf
-                    \EndWhile
-                    \If{\var{current\_route} is better than \var{local\_best\_route}}
-                        \State $\var{local\_best\_route} \gets \var{current\_route}$    
-                    \EndIf
-    
-                    \If{\var{local\_best\_route} is better than \var{global\_best\_route}}
-                        \State $\var{global\_best\_route} \gets \var{local\_best\_route}$  
-                    \EndIf
-    
-                    \State loop through \var{pheromone\_matrix} and evaporate every pheromone trail by a small percentage
-                \EndWhile
-            \EndFunction
-        \end{algorithmic}
-    \end{algorithm}
-
-\end{appendices}
 \end{document}
